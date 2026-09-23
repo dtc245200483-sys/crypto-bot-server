@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="vi" data-page="landing">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BOT CRYPTO — Tương Lai Của Giao Dịch Tự Động Đa Khung Thời Gian</title>
+  <meta name="description" content="BOT CRYPTO — Hệ thống giao dịch tự động phái sinh OKX, phân tích đa khung thời gian 15p–4h, lọc tín hiệu theo Win Rate và Profit Factor.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Anti-FOUC: restore color variant before first paint -->
+  <script>
+    (function() {
+      try {
+        var v = localStorage.getItem('landing-color-variant');
+        if (v === 'gray') {
+          document.documentElement.style.setProperty('--outer-bg', '#c9c9c6');
+          document.documentElement.style.setProperty('--card-bg', '#e4e4e2');
+        }
+      } catch(e) {}
+    })();
+  </script>
+
+  <link rel="stylesheet" href="landing.css">
+
+
+
+</head>
+<body>
+
+<!-- ============================================================
+     MAIN LANDING CARD
+     ============================================================ -->
+<div class="landing-card">
+
+  <!-- ── NAVIGATION ─────────────────────────────────────────── -->
+  <nav class="landing-nav" aria-label="Main navigation">
+
+    <!-- Logo -->
+    <a href="#" class="nav-logo" aria-label="BOT CRYPTO - Trang chủ">
+      <svg class="nav-logo-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <!-- Moon logo: circle minus offset circle via clip-path technique -->
+        <circle cx="12" cy="12" r="10" fill="#111"/>
+        <circle cx="16.5" cy="8.5" r="8.5" fill="var(--card-bg, #f7f7f5)"/>
+      </svg>
+      <span class="nav-logo-text">Bot Crypto</span>
+    </a>
+
+    <!-- Center links -->
+    <ul class="nav-menu" role="list">
+      <li><a href="#about">Về chúng tôi</a></li>
+      <li><a href="#features">Sản phẩm</a></li>
+      <li><a href="#support">Hỗ trợ</a></li>
+      <li><a href="#docs">Tài liệu</a></li>
+    </ul>
+
+    <!-- Right controls -->
+    <div class="nav-actions">
+      <!-- Color variant switcher — persisted to localStorage -->
+      <div class="color-switcher" role="group" aria-label="Giao diện">
+        <button class="color-dot color-dot-white active"
+                data-variant="white" title="Giao diện trắng" aria-label="Giao diện trắng"></button>
+        <button class="color-dot color-dot-gray"
+                data-variant="gray"  title="Giao diện xám"   aria-label="Giao diện xám"></button>
+      </div>
+      <button class="btn-pill btn-pill-outline" type="button">Đăng ký</button>
+      <button class="btn-pill btn-pill-dark"    type="button">Đăng nhập</button>
+    </div>
+  </nav>
+
+  <!-- ── HERO ───────────────────────────────────────────────── -->
+  <section class="hero" aria-label="Hero">
+
+    <!-- ──────────────────────────────────────────────────────────
+         HERO BACKGROUND VIDEO (Yêu cầu 3)
+         Toàn bộ khung hero, bao gồm cả chữ bên trái
+         ────────────────────────────────────────────────────────── -->
+    <div class="hero-bg-wrapper" id="heroBgWrapper" aria-hidden="true">
+      <video class="hero-bg-video" id="heroBgVideo" autoplay muted loop playsinline preload="auto">
+        <source src="assets/bg-video.mp4" type="video/mp4">
+      </video>
+      <div class="hero-bg-overlay"></div>
+    </div>
+
+    <!-- Left text -->
+    <div class="hero-content">
+      <p class="hero-eyebrow">Tương lai của</p>
+
+      <h1 class="hero-title">
+        <span>BOT</span>
+        <span>CRYPTO</span>
+      </h1>
+
+      <p class="hero-desc">
+        Hệ thống giao dịch tự động phái sinh OKX thế hệ mới.
+        Phân tích đồng thuận đa khung thời gian 15p → 4h, lọc tín hiệu
+        theo Win Rate, Profit Factor và Total PnL — thông minh hơn,
+        chính xác hơn.
+      </p>
+
+      <button class="btn-explore" id="exploreBtn" type="button" aria-label="Khám phá ngay">
+        <span class="btn-explore-arrow" aria-hidden="true">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </span>
+        <span class="btn-explore-label">Khám phá ngay</span>
+      </button>
+    </div>
+
+
+    <!-- ──────────────────────────────────────────────────────────
+         INTERACTIVE MOON WITH SPOTLIGHT FLOWER REVEAL (Đính chính yêu cầu)
+         CSS mask-image bám theo chuột, không cần canvas
+         ────────────────────────────────────────────────────────── -->
+    <div class="moon-wrap" id="moonWrap" role="region" aria-label="Mặt trăng tương tác">
+      <!-- Lớp hoa nằm DƯỚI (z-index thấp hơn) -->
+      <img class="flower-layer" id="flowerLayer" src="assets/beautiful-flower.jpg" alt="Ảnh hoa nghệ thuật" draggable="false" />
+
+      <!-- Lớp mặt trăng nằm TRÊN, mix-blend-mode: screen, mask-image động theo --mx/--my -->
+      <video class="moon-layer" id="moonLayer" autoplay muted loop playsinline preload="auto">
+        <source src="assets/moon-video.mp4" type="video/mp4">
+      </video>
+
+      <!-- Watermark covers: 2 khối div đen che logo AI góc trên trái và Dreamina AI góc dưới phải (theo Yêu cầu 1) -->
+      <div class="wm-cover wm-cover-tl" id="wmCoverTl" aria-hidden="true"></div>
+      <div class="wm-cover wm-cover-br" id="wmCoverBr" aria-hidden="true"></div>
+    </div>
+
+    <!-- ──────────────────────────────────────────────────────────
+         ORBIT DECORATION — bottom-left corner
+         ────────────────────────────────────────────────────────── -->
+    <div class="orbit-decoration" id="orbitDecoration" aria-hidden="true">
+      <svg class="orbit-svg" viewBox="0 0 96 56"
+           xmlns="http://www.w3.org/2000/svg" overflow="visible">
+        <defs>
+          <linearGradient id="orbitRingGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stop-color="rgba(255,255,255,0.05)"/>
+            <stop offset="20%"  stop-color="rgba(255,255,255,0.80)"/>
+            <stop offset="50%"  stop-color="rgba(255,255,255,0.25)"/>
+            <stop offset="80%"  stop-color="rgba(255,255,255,0.70)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0.05)"/>
+          </linearGradient>
+          <linearGradient id="orbitRingGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stop-color="rgba(255,255,255,0.0)"/>
+            <stop offset="30%"  stop-color="rgba(255,255,255,0.5)"/>
+            <stop offset="70%"  stop-color="rgba(255,255,255,0.2)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0.0)"/>
+          </linearGradient>
+          <filter id="orbitGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="1.5" result="B"/>
+            <feMerge><feMergeNode in="B"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <!-- Thickness gradient for the ring -->
+          <radialGradient id="ringTubeGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="rgba(255,255,255,0.9)"/>
+            <stop offset="40%"  stop-color="rgba(255,255,255,0.4)"/>
+            <stop offset="100%" stop-color="rgba(200,200,200,0.0)"/>
+          </radialGradient>
+          <filter id="ringGlow" x="-20%" y="-40%" width="140%" height="180%">
+            <feGaussianBlur stdDeviation="1.8" result="B"/>
+            <feMerge><feMergeNode in="B"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- Shadow cast under the ring (gives it 3D floating feel) -->
+        <ellipse cx="48" cy="52" rx="36" ry="4"
+                 fill="rgba(0,0,0,0.10)" filter="url(#ringGlow)"/>
+
+        <!-- Outer glass ring — main stroke -->
+        <ellipse cx="48" cy="28" rx="44" ry="18"
+                 fill="none"
+                 stroke="url(#orbitRingGrad)"
+                 stroke-width="4"
+                 filter="url(#ringGlow)"/>
+
+        <!-- Middle ring (inner shadow line — glass tube depth) -->
+        <ellipse cx="48" cy="28" rx="44" ry="18"
+                 fill="none"
+                 stroke="rgba(0,0,0,0.12)"
+                 stroke-width="1.5"
+                 stroke-dasharray="60 100"/>
+
+        <!-- Inner thinner ring (highlight on inner edge) -->
+        <ellipse cx="48" cy="28" rx="34" ry="13"
+                 fill="none"
+                 stroke="url(#orbitRingGrad2)"
+                 stroke-width="2.5"/>
+
+        <!-- Orbiting planet dot — animated in CSS -->
+        <g class="orbit-planet">
+          <circle cx="92" cy="28" r="5"
+                  fill="rgba(255,255,255,0.92)"
+                  filter="url(#orbitGlow)"/>
+          <circle cx="92" cy="28" r="8"
+                  fill="rgba(255,255,255,0.25)"/>
+        </g>
+
+        <!-- Top highlight arc on ring (catches top light) -->
+        <ellipse cx="48" cy="28" rx="44" ry="18"
+                 fill="none"
+                 stroke="rgba(255,255,255,0.8)"
+                 stroke-width="2"
+                 stroke-dasharray="30 10 20 50"
+                 stroke-dashoffset="10"/>
+      </svg>
+    </div>
+
+  </section><!-- /.hero -->
+
+  <!-- ── FEATURES ROW ───────────────────────────────────────── -->
+  <section id="features" class="features-row">
+    <div class="feature-card">
+      <div class="feature-icon">📡</div>
+      <h3 class="feature-title">Radar Đa Khung</h3>
+      <p class="feature-desc">
+        Phân tích đồng thuận tín hiệu từ khung 15p đến 4h.
+        Chỉ vào lệnh khi ít nhất 2 khung xác nhận cùng chiều.
+      </p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3 class="feature-title">Tự Động 24/7</h3>
+      <p class="feature-desc">
+        Bot quét liên tục, gửi tín hiệu qua webhook, hiển thị
+        trực tiếp trên Dashboard. Không cần can thiệp thủ công.
+      </p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🛡️</div>
+      <h3 class="feature-title">Kiểm Soát Rủi Ro</h3>
+      <p class="feature-desc">
+        Lọc nghiêm ngặt theo Win Rate, Profit Factor và PnL.
+        Chỉ hiển thị kèo đạt ngưỡng bạn thiết lập.
+      </p>
+    </div>
+  </section>
+
+  <!-- Dashboard link -->
+  <div class="dashboard-link-row">
+    <a href="/" class="dashboard-link">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Vào Dashboard giám sát tín hiệu
+    </a>
+  </div>
+
+</div><!-- /.landing-card -->
+
+<script src="moon-scratch.js"></script>
+<script src="landing.js"></script>
+
+</body>
+</html>

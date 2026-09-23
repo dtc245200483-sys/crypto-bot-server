@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BOT CRYPTO PRO — Giao Dịch Phái Sinh Tự Động &amp; Bảng Kèo TradingView OKX</title>
+  <meta name="description" content="BOT CRYPTO PRO — Hệ thống điều phối &amp; Bảng tổng hợp tín hiệu phái sinh đạt chuẩn đa khung thời gian 15p, 30p, 1h, 4h từ TradingView sang OKX.">
+  <link rel="icon" type="image/svg+xml" href="assets/moon-logo.svg">
+  <link rel="stylesheet" href="style.css?v=10">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Khởi tạo sớm theme & color variant để chống giật màn hình (FOUC) -->
+  <script>
+    (function() {
+      try {
+        var variant = localStorage.getItem('landing-color-variant');
+        var savedTheme = localStorage.getItem('orchestrator_theme') || localStorage.getItem('theme');
+        var theme = savedTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        if (variant === 'white') theme = 'light';
+        else if (variant === 'gray' || variant === 'dark') theme = 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+        if (variant === 'gray') {
+          document.documentElement.classList.add('variant-gray');
+      } catch (e) {}
+    })();
+  </script>
+  <!-- Google Identity Services SDK (Chính hãng từ Google) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="ambient-glow glow-top-left"></div>
+  <div class="ambient-glow glow-top-right"></div>
+  <div class="ambient-glow glow-bottom-center"></div>
+
+  <!-- Top Navigation Header -->
+  <header class="top-nav" id="topNav">
+    <div class="nav-brand">
+      <a href="#hero" class="nav-brand-link" aria-label="BOT CRYPTO PRO - Trang chủ">
+        <div class="brand-moon-icon" aria-hidden="true">
+          <img src="assets/moon-logo.svg" alt="Moon Logo" class="brand-moon-img">
+        </div>
+        <div class="brand-text">
+          <div class="brand-title-wrap">
+            <span class="brand-title">BOT CRYPTO <span class="badge-pro">PRO</span></span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Center Navigation Links -->
+    <nav class="nav-menu" aria-label="Điều hướng chính">
+      <a href="#hero" class="nav-link active">Trang Chủ</a>
+      <a href="#dashboardSection" class="nav-link">Bảng Kèo</a>
+      <a href="#metricsSection" class="nav-link">Thống Kê</a>
+      <a href="#introSection" class="nav-link">Giới Thiệu</a>
+    </nav>
+
+    <!-- Action Toolbar Right -->
+    <div class="nav-meta">
+      <div class="countdown-badge" id="countdownBadge" title="Tự động cập nhật dữ liệu">
+        <span class="countdown-spinner"></span>
+        <span>Làm mới sau: <b id="countdownTimer">30</b>s</span>
+      </div>
+
+      <button id="soundToggleBtn" class="icon-action-btn" title="Bật/Tắt chuông báo khi có kèo mới" aria-label="Bật tắt âm thanh">
+        <svg id="soundOnIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+        <svg id="soundOffIcon" class="hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <line x1="23" y1="9" x2="17" y2="15"></line>
+          <line x1="17" y1="9" x2="23" y2="15"></line>
+        </svg>
+      </button>
+
+      <!-- Color Variant Switcher: White / Gray / Dark Cosmic -->
+      <div class="color-switcher" role="group" aria-label="Chọn giao diện màu">
+        <button class="color-dot color-dot-white" id="colorDotWhite" data-variant="white" title="Giao diện Sáng (White)" aria-label="Giao diện Sáng"></button>
+        <button class="color-dot color-dot-gray" id="colorDotGray" data-variant="gray" title="Giao diện Xám Hiện Đại (Gray)" aria-label="Giao diện Xám"></button>
+        <button class="color-dot color-dot-dark active" id="colorDotDark" data-variant="dark" title="Giao diện Vũ Trụ Tối (Dark Cosmic)" aria-label="Giao diện Vũ Trụ Tối"></button>
+      </div>
+
+      <!-- Theme Toggle (Dark / Light Mode) -->
+      <button id="themeToggleBtn" class="icon-action-btn theme-toggle-btn" title="Chuyển đổi giao diện Sáng / Tối (Dark / Light mode)" aria-label="Đổi giao diện Sáng / Tối">
+        <svg id="themeSunIcon" class="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg id="themeMoonIcon" class="theme-icon hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+
+      <button id="openSettingsBtn" class="btn-settings hidden" title="Mở cài đặt bộ lọc và nhận tín hiệu">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span>Cài đặt</span>
+      </button>
+
+      <!-- Authentication Controls (Đăng Nhập / Đăng Ký) -->
+      <div class="auth-header-wrap" id="authHeaderWrap">
+        <button id="authOpenModalBtn" class="btn-auth-header" title="Đăng Nhập / Đăng Ký Tài Khoản">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span id="authBtnLabel">Đăng Nhập</span>
+        </button>
+        <div id="userProfileBadge" class="user-profile-badge hidden" title="Tài khoản cá nhân">
+          <div class="user-avatar-mini" id="userAvatarMini">TP</div>
+          <div class="user-info-text">
+            <span class="user-display-name" id="userDisplayName">Trader VIP</span>
+            <span class="user-vip-tag">PRO</span>
+          </div>
+          <button id="authLogoutBtn" class="btn-logout-mini" title="Đăng Xuất">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       HERO SECTION — BOT CRYPTO GALAXY & INTERACTIVE MOON
+       ============================================================ -->
+  <section class="hero" id="hero" aria-label="Hero">
+    <!-- Hero Background Video: 1440p ultra-sharp galaxy loop -->
+    <div class="hero-bg-wrapper" id="heroBgWrapper" aria-hidden="true">
+      <video class="hero-bg-video" id="heroBgVideo" autoplay muted loop playsinline preload="auto">
+        <source src="assets/bg-video.mp4" type="video/mp4">
+      </video>
+      <div class="hero-bg-overlay"></div>
+    </div>
+
+    <!-- Left Content -->
+    <div class="hero-content">
+      <p class="hero-eyebrow">Tương lai của giao dịch thông minh</p>
+      <h1 class="hero-title">
+        <span>BOT</span>
+        <span>CRYPTO</span>
+      </h1>
+      <p class="hero-desc">
+        Hệ thống phân tích &amp; điều phối phái sinh OKX thế hệ mới.
+        Đồng thuận đa khung thời gian 15p → 4h, lọc tín hiệu theo Win Rate,
+        Profit Factor và Total PnL — chính xác, an toàn, hiệu quả.
+      </p>
+
+      <div class="hero-btn-row">
+        <button class="btn-explore" id="exploreBtn" type="button" aria-label="Xem Bảng Kèo Trực Tiếp">
+          <span class="btn-explore-arrow" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <polyline points="19 12 12 19 5 12"/>
+            </svg>
+          </span>
+          <span class="btn-explore-label">Xem Bảng Kèo Trực Tiếp</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Interactive Moon with Half-Moon Flower Reveal -->
+    <div class="moon-wrap" id="moonWrap" role="region" aria-label="Mặt trăng tương tác">
+      <!-- Lớp hoa nằm DƯỚI (z-index thấp hơn) -->
+      <img class="flower-layer" id="flowerLayer" src="assets/beautiful-flower.jpg" alt="Ảnh hoa nghệ thuật" draggable="false" />
+
+      <!-- Lớp mặt trăng nằm TRÊN, mix-blend-mode: screen, mask-image động theo chuột -->
+      <video class="moon-layer" id="moonLayer" autoplay muted loop playsinline preload="auto">
+        <source src="assets/moon-video.mp4" type="video/mp4">
+      </video>
+
+      <!-- Watermark covers: 2 khối div đen che logo AI góc trên trái và Dreamina AI góc dưới phải -->
+      <div class="wm-cover wm-cover-tl" id="wmCoverTl" aria-hidden="true"></div>
+      <div class="wm-cover wm-cover-br" id="wmCoverBr" aria-hidden="true"></div>
+    </div>
+
+    <!-- Orbit Decoration — bottom-left corner -->
+    <div class="orbit-decoration" id="orbitDecoration" aria-hidden="true">
+      <svg class="orbit-svg" viewBox="0 0 96 56"
+           xmlns="http://www.w3.org/2000/svg" overflow="visible">
+        <defs>
+          <linearGradient id="orbitRingGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stop-color="rgba(255,255,255,0.05)"/>
+            <stop offset="20%"  stop-color="rgba(255,255,255,0.80)"/>
+            <stop offset="50%"  stop-color="rgba(255,255,255,0.25)"/>
+            <stop offset="80%"  stop-color="rgba(255,255,255,0.70)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0.05)"/>
+          </linearGradient>
+          <linearGradient id="orbitRingGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stop-color="rgba(255,255,255,0.0)"/>
+            <stop offset="30%"  stop-color="rgba(255,255,255,0.5)"/>
+            <stop offset="70%"  stop-color="rgba(255,255,255,0.2)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0.0)"/>
+          </linearGradient>
+          <filter id="orbitGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="1.5" result="B"/>
+            <feMerge><feMergeNode in="B"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <radialGradient id="ringTubeGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="rgba(255,255,255,0.9)"/>
+            <stop offset="40%"  stop-color="rgba(255,255,255,0.4)"/>
+            <stop offset="100%" stop-color="rgba(200,200,200,0.0)"/>
+          </radialGradient>
+          <filter id="ringGlow" x="-20%" y="-40%" width="140%" height="180%">
+            <feGaussianBlur stdDeviation="1.8" result="B"/>
+            <feMerge><feMergeNode in="B"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <ellipse cx="48" cy="52" rx="36" ry="4" fill="rgba(0,0,0,0.10)" filter="url(#ringGlow)"/>
+        <ellipse cx="48" cy="28" rx="44" ry="18" fill="none" stroke="url(#orbitRingGrad)" stroke-width="4" filter="url(#ringGlow)"/>
+        <ellipse cx="48" cy="28" rx="44" ry="18" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" stroke-dasharray="60 100"/>
+        <ellipse cx="48" cy="28" rx="34" ry="13" fill="none" stroke="url(#orbitRingGrad2)" stroke-width="2.5"/>
+        <g class="orbit-planet">
+          <circle cx="92" cy="28" r="5" fill="rgba(255,255,255,0.92)" filter="url(#orbitGlow)"/>
+          <circle cx="92" cy="28" r="8" fill="rgba(255,255,255,0.25)"/>
+        </g>
+        <ellipse cx="48" cy="28" rx="44" ry="18" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-dasharray="30 10 20 50" stroke-dashoffset="10"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       MAIN DASHBOARD LAYOUT
+       ============================================================ -->
+  <div class="main-layout" id="dashboardSection">
+
+    <!-- Stat Summary Cards -->
+    <section class="metrics-grid" id="metricsSection" aria-label="Thống kê tổng quan">
+      <!-- Total Setups Card -->
+      <div class="metric-card card-total">
+        <div class="metric-glass-highlight"></div>
+        <div class="metric-header">
+          <span class="metric-title">Tổng Kèo Đạt Chuẩn</span>
+          <span class="metric-icon-badge badge-blue">🎯</span>
+        </div>
+        <div class="metric-main-row">
+          <div class="metric-value" id="totalSetupsCount">0</div>
+          <span class="metric-trend-pill" id="totalTrendPill">Tự động lọc</span>
+        </div>
+        <div class="metric-sub" id="totalSetupsSub">Đa khung: 15p • 30p • 1h • 4h</div>
+      </div>
+
+      <!-- Long Signals Card -->
+      <div class="metric-card card-long">
+        <div class="metric-glass-highlight"></div>
+        <div class="metric-header">
+          <span class="metric-title">Tín Hiệu LONG</span>
+          <span class="metric-icon-badge badge-green">📈</span>
+        </div>
+        <div class="metric-main-row">
+          <div class="metric-value long-text" id="longSetupsCount">0</div>
+          <span class="metric-ratio-pill long-ratio" id="longRatioPill">0%</span>
+        </div>
+        <div class="metric-sub">Đồng thuận xu hướng Tăng</div>
+      </div>
+
+      <!-- Short Signals Card -->
+      <div class="metric-card card-short">
+        <div class="metric-glass-highlight"></div>
+        <div class="metric-header">
+          <span class="metric-title">Tín Hiệu SHORT</span>
+          <span class="metric-icon-badge badge-red">📉</span>
+        </div>
+        <div class="metric-main-row">
+          <div class="metric-value short-text" id="shortSetupsCount">0</div>
+          <span class="metric-ratio-pill short-ratio" id="shortRatioPill">0%</span>
+        </div>
+        <div class="metric-sub">Đồng thuận xu hướng Giảm</div>
+      </div>
+
+      <!-- Win Rate Card -->
+      <div class="metric-card card-winrate">
+        <div class="metric-glass-highlight"></div>
+        <div class="metric-header">
+          <span class="metric-title">Win Rate & PF Trung Bình</span>
+          <span class="metric-icon-badge badge-amber">⚡</span>
+        </div>
+        <div class="metric-main-row">
+          <div class="metric-value amber-text" id="avgWinRate">0.0%</div>
+          <span class="metric-pf-badge" id="avgPfBadge">PF: 0.00</span>
+        </div>
+        <div class="metric-sub" id="thresholdDisplaySub">Ngưỡng lọc: WR &gt; 42% • PF &gt; 0.8</div>
+      </div>
+    </section>
+
+
+
+    <!-- Filter & Controls Toolbar -->
+    <section class="toolbar-card" aria-label="Bộ lọc dữ liệu">
+      <div class="toolbar-left">
+        <!-- Search Input -->
+        <div class="search-input-wrapper">
+          <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Tìm theo symbol (BTC, ETH, SOL...)" autocomplete="off">
+          <kbd class="search-kbd">Ctrl K</kbd>
+        </div>
+
+        <!-- Quick Filter Tabs -->
+        <div class="quick-filter-group" id="quickFilterGroup">
+          <button class="filter-chip active" data-filter="all">Tất cả</button>
+          <button class="filter-chip tf-15m-chip" data-filter="15m">15p</button>
+          <button class="filter-chip tf-30m-chip" data-filter="30m">30p</button>
+          <button class="filter-chip tf-1h-chip" data-filter="1h">1h</button>
+          <button class="filter-chip tf-4h-chip" data-filter="4h">4h</button>
+          <span class="filter-divider"></span>
+          <button class="filter-chip long-chip" data-filter="long">📈 LONG</button>
+          <button class="filter-chip short-chip" data-filter="short">📉 SHORT</button>
+        </div>
+
+        <!-- Hidden Native Selects for backward compatibility -->
+        <select id="timeframeFilter" class="hidden-select" aria-label="Lọc theo khung thời gian">
+          <option value="all">Tất cả khung (15p, 30p, 1h, 4h)</option>
+          <option value="15m">Khung 15p</option>
+          <option value="30m">Khung 30p</option>
+          <option value="1h">Khung 1h</option>
+          <option value="4h">Khung 4h</option>
+        </select>
+
+        <select id="signalFilter" class="hidden-select" aria-label="Lọc theo vị thế">
+          <option value="all">Tất cả vị thế</option>
+          <option value="long">Chỉ LONG</option>
+          <option value="short">Chỉ SHORT</option>
+        </select>
+      </div>
+
+      <div class="toolbar-right">
+        <!-- Sort Dropdown -->
+        <div class="sort-wrapper">
+          <label for="sortSelect">Sắp xếp:</label>
+          <select id="sortSelect" class="custom-select">
+            <option value="newest">Quét mới nhất</option>
+            <option value="winrate">Win Rate cao nhất</option>
+            <option value="pf">Profit Factor cao nhất</option>
+            <option value="pnl">Total PnL cao nhất</option>
+          </select>
+        </div>
+
+        <button id="clearSetupsBtn" class="clear-btn" title="Xóa toàn bộ dữ liệu hiện tại">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          <span>Xóa dữ liệu</span>
+        </button>
+
+        <button id="refreshBtn" class="refresh-btn" title="Tải lại danh sách ngay lập tức">
+          <svg class="refresh-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 4v6h-6"></path>
+            <path d="M1 20v-6h6"></path>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          <span>Làm mới</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Main Table Container -->
+    <main class="table-container" aria-label="Bảng danh sách kèo">
+      <div class="table-header-info">
+        <div class="table-header-left-group">
+          <span id="tableShowingCount">Đang hiển thị <b>0</b> setup</span>
+          <div class="system-thresholds-inline" id="footerThresholds">
+            <span class="threshold-label">Cấu hình hệ thống:</span>
+            <span class="badge-pill" id="footWr">Win Rate &gt; <b>42%</b></span>
+            <span class="badge-pill" id="footPf">Profit Factor &gt; <b>0.8</b></span>
+            <span class="badge-pill" id="footPnl">Total PnL &gt; <b>$0</b></span>
+            <span class="badge-pill highlight-pill" id="footActiveTfs">Đang nhận: <b>30p, 1h, 4h</b></span>
+          </div>
+        </div>
+        <span class="live-tag"><span class="live-dot"></span>Dữ liệu thời gian thực</span>
+      </div>
+
+      <div class="table-scroll-wrapper">
+        <table class="data-table pro-matrix">
+          <thead>
+            <tr>
+              <th style="width: 36px; text-align: center;">#</th>
+              <th>Symbol &amp; Coin</th>
+              <th style="text-align: center; width: 125px;">Khung &amp; Vị thế</th>
+              <th style="text-align: right; width: 155px;">Entry &amp; Stop Loss</th>
+              <th style="text-align: center; width: 215px;">Mục Tiêu TP1 • TP2 • TP3</th>
+              <th style="text-align: center; width: 210px;">Hiệu Suất (WR • PF • PnL)</th>
+              <th style="text-align: center; width: 145px;">Đồng Thuận &amp; Giờ</th>
+              <th style="text-align: center; width: 135px;">Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody id="setupsTableBody">
+            <tr>
+              <td colspan="8" class="loading-placeholder">
+                <div class="loader"></div>
+                <span>Đang tải danh sách kèo đẹp...</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State Message -->
+      <div id="emptyMessage" class="empty-state hidden">
+        <div class="empty-icon">🔍</div>
+        <h3>Không tìm thấy setup nào phù hợp</h3>
+        <p>Thử đổi bộ lọc khung thời gian (15p, 30p, 1h, 4h) hoặc kiểm tra cài đặt nhận tín hiệu.</p>
+        <button id="resetFiltersBtn" class="btn-secondary">Đặt lại bộ lọc</button>
+      </div>
+    </main>
+
+    <!-- ========================================================================= -->
+    <!-- DOCKED CHART STUDIO (PHÒNG XEM NẾN ĐỘC LẬP - ZERO HORIZONTAL SCROLL)     -->
+    <!-- ========================================================================= -->
+    <section id="chartStudioPanel" class="docked-chart-studio hidden" aria-label="Phòng xem nến độc lập">
+      <div class="studio-header">
+        <div class="studio-title-area">
+          <div class="studio-coin-tag">
+            <span class="studio-icon">📊</span>
+            <span id="studioSymbolTitle" class="studio-symbol">BTCUSDT</span>
+            <span id="studioSignalBadge" class="signal-pill long">▲ LONG</span>
+            <span id="studioTfBadge" class="tf-badge tf-badge-30m">30p</span>
+          </div>
+          <div class="studio-levels-summary">
+            <span class="studio-level-chip entry">Entry: <b id="studioEntryVal">$0.00</b></span>
+            <span class="studio-level-chip sl">SL: <b id="studioSlVal">$0.00</b></span>
+            <span class="studio-level-chip tp">TP1: <b id="studioTp1Val">$0.00</b></span>
+            <span class="studio-level-chip tp">TP2: <b id="studioTp2Val">$0.00</b></span>
+            <span class="studio-level-chip tp">TP3: <b id="studioTp3Val">$0.00</b></span>
+          </div>
+        </div>
+
+        <div class="studio-toolbar">
+          <div class="studio-mode-toggle" id="studioModeToggle">
+            <button class="studio-mode-btn active" data-mode="grid" title="Xem 3 biểu đồ mini cùng lúc">Lưới 3 Khung</button>
+            <button class="studio-mode-btn" data-mode="30m" title="Phóng to khung 30p">30p</button>
+            <button class="studio-mode-btn" data-mode="1H" title="Phóng to khung 1h">1h</button>
+            <button class="studio-mode-btn" data-mode="4H" title="Phóng to khung 4h">4h</button>
+          </div>
+          <button id="studioSyncBtn" class="studio-btn-action" title="Tải lại nến mới nhất từ sàn OKX">
+            🔄 Cập nhật nến
+          </button>
+          <button id="studioCloseBtn" class="studio-btn-close" title="Đóng phòng xem nến" aria-label="Đóng biểu đồ">
+            ✕ Đóng
+          </button>
+        </div>
+      </div>
+
+      <div class="studio-viewport" id="studioViewport">
+        <!-- Chart containers rendered dynamically here -->
+      </div>
+    </section>
+
+    <!-- ============================================================
+         INTRODUCTION SECTION (GIỚI THIỆU WEB)
+         ============================================================ -->
+    <section class="intro-section" id="introSection" aria-label="Giới thiệu Bot Crypto Pro">
+      <div class="intro-bg-deco" aria-hidden="true">
+        <div class="intro-blob intro-blob-1"></div>
+        <div class="intro-blob intro-blob-2"></div>
+        <div class="intro-grid-lines" aria-hidden="true"></div>
+      </div>
+
+      <div class="intro-container">
+
+        <!-- ── LEFT COLUMN: Text & CTA ── -->
+        <div class="intro-text-col">
+          <div class="intro-eyebrow">
+            <span class="intro-eyebrow-dot"></span>
+            <span>VỀ CHÚNG TÔI</span>
+          </div>
+
+          <h2 class="intro-heading">
+            Hệ Thống Giao Dịch
+            <span class="intro-heading-grad">Thông Minh Thế Hệ Mới</span>
+          </h2>
+
+          <p class="intro-body">
+            <strong>BOT CRYPTO PRO</strong> là nền tảng phân tích &amp; điều phối tín hiệu phái sinh OKX được xây dựng
+            dành riêng cho Trader chuyên nghiệp. Chúng tôi kết hợp thuật toán đồng thuận đa khung thời gian
+            với tiêu chuẩn kiểm soát rủi ro khắt khe để giúp bạn phát hiện cơ hội vào lệnh xác suất cao nhất
+            — hoàn toàn tự động, 24/7.
+          </p>
+
+          <p class="intro-body">
+            Mỗi tín hiệu được sàng lọc qua ít nhất <strong>4 lớp kiểm định</strong>: đồng thuận khung thời gian
+            (15p → 4h), Win Rate, Profit Factor và Total PnL thực tế. Chỉ những kèo đạt <em>tất cả ngưỡng</em>
+            mới được hiển thị lên Bảng Kèo — loại bỏ hơn 85% nhiễu và tín hiệu giả.
+          </p>
+
+          <!-- Mission / Vision chips -->
+          <div class="intro-mv-row">
+            <div class="intro-mv-card">
+              <div class="intro-mv-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              </div>
+              <div>
+                <span class="intro-mv-label">Sứ Mệnh</span>
+                <p class="intro-mv-text">Dân chủ hoá công cụ định lượng chuyên nghiệp cho mọi Trader Việt Nam.</p>
+              </div>
+            </div>
+            <div class="intro-mv-card">
+              <div class="intro-mv-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+              </div>
+              <div>
+                <span class="intro-mv-label">Tầm Nhìn</span>
+                <p class="intro-mv-text">Trở thành hệ sinh thái giao dịch tự động hàng đầu Đông Nam Á vào 2026.</p>
+              </div>
+            </div>
+          </div>
+
+          <a href="#dashboardSection" class="intro-cta-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            Xem Bảng Kèo Ngay
+          </a>
+        </div>
+
+        <!-- ── RIGHT COLUMN: Stats & How-it-works ── -->
+        <div class="intro-visual-col">
+
+          <!-- Stat Cards Grid -->
+          <div class="intro-stats-grid">
+            <div class="intro-stat-card">
+              <div class="intro-stat-glow" style="--gc:#2962ff"></div>
+              <span class="intro-stat-num" style="--gc:#2962ff">4</span>
+              <span class="intro-stat-unit">Khung TG</span>
+              <span class="intro-stat-desc">15p • 30p • 1h • 4h</span>
+            </div>
+            <div class="intro-stat-card">
+              <div class="intro-stat-glow" style="--gc:#00e5b0"></div>
+              <span class="intro-stat-num" style="--gc:#00e5b0">&lt;15ms</span>
+              <span class="intro-stat-unit">Độ Trễ</span>
+              <span class="intro-stat-desc">Webhook tốc độ cao</span>
+            </div>
+            <div class="intro-stat-card">
+              <div class="intro-stat-glow" style="--gc:#a855f7"></div>
+              <span class="intro-stat-num" style="--gc:#a855f7">85%+</span>
+              <span class="intro-stat-unit">Lọc Nhiễu</span>
+              <span class="intro-stat-desc">Triệt tiêu tín hiệu giả</span>
+            </div>
+            <div class="intro-stat-card">
+              <div class="intro-stat-glow" style="--gc:#f59e0b"></div>
+              <span class="intro-stat-num" style="--gc:#f59e0b">24/7</span>
+              <span class="intro-stat-unit">Hoạt Động</span>
+              <span class="intro-stat-desc">Uptime 99.98%</span>
+            </div>
+          </div>
+
+          <!-- How it works timeline -->
+          <div class="intro-how-card">
+            <h3 class="intro-how-title">Cách Hệ Thống Hoạt Động</h3>
+            <ol class="intro-timeline" role="list">
+              <li class="intro-timeline-item">
+                <div class="intro-tl-num">01</div>
+                <div class="intro-tl-body">
+                  <span class="intro-tl-title">Thu Nhận Tín Hiệu</span>
+                  <span class="intro-tl-desc">Webhook từ TradingView gửi JSON &lt;15ms vào máy chủ.</span>
+                </div>
+              </li>
+              <li class="intro-timeline-item">
+                <div class="intro-tl-num">02</div>
+                <div class="intro-tl-body">
+                  <span class="intro-tl-title">Phân Tích &amp; Lọc</span>
+                  <span class="intro-tl-desc">Đồng thuận 4 khung, kiểm tra Win Rate, PF và PnL.</span>
+                </div>
+              </li>
+              <li class="intro-timeline-item">
+                <div class="intro-tl-num">03</div>
+                <div class="intro-tl-body">
+                  <span class="intro-tl-title">Hiển Thị Dashboard</span>
+                  <span class="intro-tl-desc">Kèo đạt chuẩn xuất hiện ngay lập tức với cảnh báo âm thanh.</span>
+                </div>
+              </li>
+              <li class="intro-timeline-item">
+                <div class="intro-tl-num">04</div>
+                <div class="intro-tl-body">
+                  <span class="intro-tl-title">Cập Nhật Liên Tục</span>
+                  <span class="intro-tl-desc">Hệ thống tự làm mới mỗi 30 giây, không cần can thiệp.</span>
+                </div>
+              </li>
+            </ol>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         ABOUT & FEATURES SECTION (GIỚI THIỆU NỀN TẢNG & TÍNH NĂNG)
+         ============================================================ -->
+    <section class="about-platform-section" id="aboutSection" aria-label="Giới thiệu & Tính năng">
+      <div class="about-header-wrap">
+        <div class="about-eyebrow-chip">
+          <span class="about-chip-dot"></span>
+          <span>GIỚI THIỆU HỆ THỐNG &amp; TÍNH NĂNG VƯỢT TRỘI</span>
+        </div>
+        <h2 class="about-title">Nền Tảng Phân Tích &amp; Điều Phối Phái Sinh OKX</h2>
+        <p class="about-subtitle">
+          BOT CRYPTO PRO là hệ thống định lượng tự động dành cho Trader chuyên nghiệp, kết hợp thuật toán đồng thuận đa khung thời gian với các tiêu chuẩn kiểm soát rủi ro khắt khe để phát hiện cơ hội vào lệnh xác suất cao nhất.
+        </p>
+      </div>
+
+      <!-- Quick Metrics Strip -->
+      <div class="about-metrics-strip">
+        <div class="about-stat-item">
+          <span class="about-stat-num">4 Khung</span>
+          <span class="about-stat-lbl">Đồng thuận 15p • 30p • 1h • 4h</span>
+        </div>
+        <div class="about-stat-divider"></div>
+        <div class="about-stat-item">
+          <span class="about-stat-num">&lt; 15ms</span>
+          <span class="about-stat-lbl">Độ trễ tiếp nhận Webhook</span>
+        </div>
+        <div class="about-stat-divider"></div>
+        <div class="about-stat-item">
+          <span class="about-stat-num">3 Mốc TP</span>
+          <span class="about-stat-lbl">Target linh hoạt &amp; SL bảo toàn vốn</span>
+        </div>
+        <div class="about-stat-divider"></div>
+        <div class="about-stat-item">
+          <span class="about-stat-num">100% Google</span>
+          <span class="about-stat-lbl">OAuth 2.0 &amp; JWT an toàn tuyệt đối</span>
+        </div>
+      </div>
+
+      <!-- Feature Grid: 6 institutional-grade feature cards -->
+      <div class="about-features-grid">
+        <!-- Feature 1 -->
+        <div class="about-feature-card">
+          <div class="feature-card-glow glow-blue"></div>
+          <div class="feature-icon-box box-blue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <circle cx="12" cy="12" r="6"></circle>
+              <circle cx="12" cy="12" r="2"></circle>
+            </svg>
+          </div>
+          <div class="feature-badge-row">
+            <span class="feature-tag tag-blue">Đa Chu Kỳ</span>
+          </div>
+          <h3 class="feature-card-title">Đồng Thuận Đa Khung (MTF Consensus)</h3>
+          <p class="feature-card-desc">
+            Quét và đối chiếu đồng bộ trên 4 khung thời gian 15p, 30p, 1h và 4h. Tín hiệu chỉ được duyệt khi có sự đồng pha giữa xu hướng lớn và nhịp nến nhỏ, giúp triệt tiêu hơn 85% tín hiệu giả (whipsaw).
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="about-feature-card">
+          <div class="feature-card-glow glow-cyan"></div>
+          <div class="feature-icon-box box-cyan">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <div class="feature-badge-row">
+            <span class="feature-tag tag-cyan">Kiểm Soát Kỷ Luật</span>
+          </div>
+          <h3 class="feature-card-title">Bộ Lọc Ngưỡng Định Lượng Tùy Biến</h3>
+          <p class="feature-card-desc">
+            Tự động lọc các cơ hội theo tỷ lệ Thắng (Win Rate &gt; 42%), Hệ số Lợi nhuận (PF &gt; 0.8) và PnL thực tế. Người dùng có thể tự do tùy chỉnh ngưỡng lọc và chọn lọc khung giờ muốn nhận ngay trong Cài Đặt.
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="about-feature-card">
+          <div class="feature-card-glow glow-purple"></div>
+          <div class="feature-icon-box box-purple">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 3v18h18"></path>
+              <path d="m19 9-5 5-4-4-3 3"></path>
+            </svg>
+          </div>
+          <div class="feature-badge-row">
+            <span class="feature-tag tag-purple">Biểu Đồ Sàn OKX</span>
+          </div>
+          <h3 class="feature-card-title">OKX Candle Studio &amp; Price Lines</h3>
+          <p class="feature-card-desc">
+            Hiển thị trực quan dữ liệu nến thời gian thực với công nghệ TradingView Lightweight Charts. Tự động vẽ chính xác điểm Entry, dải Stop Loss an toàn cùng 3 mốc chốt lời mục tiêu (TP1, TP2, TP3).
+          </p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="about-feature-card">
+          <div class="feature-card-glow glow-gold"></div>
+          <div class="feature-icon-box box-gold">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <div class="feature-badge-row">
+            <span class="feature-tag tag-gold">Bảo Mật Google</span>
+          </div>
+          <h3 class="feature-card-title">Xác Thực Chuẩn Tổ Chức (OAuth 2.0)</h3>
+          <p class="feature-card-desc">
+            Tích hợp cơ chế đăng nhập bằng Google chính hãng qua cửa sổ bảo mật độc quyền của Google. Mã hóa phiên làm việc qua JWT Token, bảo vệ dữ liệu kèo độc quyền và tự động lưu phiên mượt mà.
+          </p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="about-feature-card">
+          <div class="feature-card-glow glow-emerald"></div>
+          <div class="feature-icon-box box-emerald">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <div class="feature-badge-row">
+            <span class="feature-tag tag-emerald">TradingView Sync</span>
+          </div>
+          <h3 class="feature-card-title">Cổng Webhook Siêu Tốc &lt; 15ms</h3>
+          <p class="feature-card-desc">
+            Đầu thu tín hiệu tự động hóa hỗ trợ kết nối trực tiếp với chiến lược Pine Script trên TradingView. Tiếp nhận thông điệp JSON, thẩm định bộ lọc và hiển thị ngay lập tức lên bảng kèo mà không hề trễ nhịp.
+          </p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="about-feature-card">
+          <div class="feature-card-glow glow-rose"></div>
+          <div class="feature-icon-box box-rose">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+          </div>
+          <div class="feature-badge-row">
+            <span class="feature-tag tag-rose">Trải Nghiệm Pro</span>
+          </div>
+          <h3 class="feature-card-title">Cảnh Báo Âm Thanh &amp; Giao Diện Kép</h3>
+          <p class="feature-card-desc">
+            Hệ thống phát chuông thông báo âm thanh tức thì khi có setup mới xuất hiện. Hỗ trợ đầy đủ bộ giao diện Dark Mode / Light Mode chuẩn GoogleChromeLabs, giúp bảo vệ mắt khi theo dõi thị trường liên tục.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SUPPORT & PLATFORM INFO SECTION (HỖ TRỢ & THÔNG TIN WEB)
+         ============================================================ -->
+    <footer class="platform-support-footer" id="supportSection">
+      <div class="support-container">
+        <!-- Col 1: Brand & Overview -->
+        <div class="support-col support-col-brand">
+          <div class="support-brand-header">
+            <img src="assets/moon-logo.svg" alt="Moon Logo" class="support-moon-icon">
+            <div class="support-brand-text">
+              <span class="support-brand-title">BOT CRYPTO <span class="badge-pro">PRO</span></span>
+              <p class="support-brand-desc">Hệ thống quét &amp; định lượng phái sinh OKX đa khung thời gian 15p • 30p • 1h • 4h. Kết nối TradingView Webhook trực tiếp tốc độ cao.</p>
+            </div>
+          </div>
+          <div class="support-status-chip">
+            <span class="pulse-green-dot"></span>
+            <span>Hệ thống: <b>Hoạt động bình thường (Uptime 99.98%)</b></span>
+          </div>
+        </div>
+
+        <!-- Col 2: Kênh Hỗ Trợ Trực Tuyến -->
+        <div class="support-col">
+          <h4 class="support-col-title">Trung Tâm Hỗ Trợ</h4>
+          <ul class="support-link-list">
+            <li>
+              <a href="https://t.me/" target="_blank" rel="noopener noreferrer" class="support-item-link">
+                <span class="support-icon telegram-icon">💬</span>
+                <div>
+                  <span class="support-link-label">Kênh Telegram Hỗ Trợ 24/7</span>
+                  <span class="support-link-sub">@BotCryptoPro_Support</span>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="mailto:support@botcrypto.pro" class="support-item-link">
+                <span class="support-icon email-icon">✉️</span>
+                <div>
+                  <span class="support-link-label">Email Kỹ Thuật &amp; API</span>
+                  <span class="support-link-sub">support@botcrypto.pro</span>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="javascript:void(0)" class="support-item-link" id="communityGuideBtn">
+                <span class="support-icon docs-icon">📘</span>
+                <div>
+                  <span class="support-link-label">Tài Liệu Hướng Dẫn Kèo</span>
+                  <span class="support-link-sub">Cẩm nang tỷ lệ R:R &amp; Điểm chốt lời</span>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Kết Nối & Tích Hợp Nhanh -->
+        <div class="support-col">
+          <h4 class="support-col-title">Tích Hợp &amp; Kết Nối</h4>
+          <div class="support-quick-info">
+            <div class="support-info-row">
+              <span class="info-label">Sàn giao dịch:</span>
+              <span class="info-val">OKX Futures / Perpetual Swaps</span>
+            </div>
+            <div class="support-info-row">
+              <span class="info-label">Chuẩn dữ liệu:</span>
+              <span class="info-val" id="supportThresholdVal">Win Rate &gt; 42% • PF &gt; 0.80</span>
+            </div>
+            <div class="support-info-row">
+              <span class="info-label">Độ trễ xử lý:</span>
+              <span class="info-val text-green">&lt; 15ms (Ultra-Low Latency)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 4: Tuyên Bố Rủi Ro & Pháp Lý -->
+        <div class="support-col support-col-disclaimer">
+          <h4 class="support-col-title">Cảnh Báo Rủi Ro</h4>
+          <p class="support-disclaimer-text">
+            Giao dịch phái sinh Crypto có rủi ro biến động vốn cao. Tín hiệu trên bảng kèo được tổng hợp thuật toán định lượng tự động nhằm mục đích hỗ trợ phân tích và tham khảo, không cấu thành lời khuyên đầu tư tài chính. Quý trader luôn chủ động quản trị vốn và tuân thủ Stop Loss nghiêm ngặt.
+          </p>
+          <div class="support-copy-row">
+            <span>© 2026 BOT CRYPTO PRO. Tất cả quyền được bảo lưu.</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- AUTH MODAL (ĐĂNG NHẬP / ĐĂNG KÝ TÀI KHOẢN TRADER)                        -->
+  <!-- ========================================================================= -->
+  <div class="modal-overlay hidden" id="authModalOverlay" aria-modal="true" role="dialog">
+    <div class="auth-modal" id="authModal">
+      <!-- Modal Header -->
+      <div class="auth-modal-header">
+        <div class="auth-brand-logo">
+          <img src="assets/moon-logo.svg" alt="Moon Logo" class="auth-moon-icon">
+          <div class="auth-brand-info">
+            <span class="auth-brand-title">BOT CRYPTO <span class="badge-pro">PRO</span></span>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="closeAuthBtn" aria-label="Đóng cửa sổ">✕</button>
+      </div>
+
+      <!-- Auth Tab Switcher -->
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab active" id="tabLoginBtn" type="button" role="tab" aria-selected="true" data-tab="login">
+          <span>Đăng Nhập</span>
+        </button>
+        <button class="auth-tab" id="tabRegisterBtn" type="button" role="tab" aria-selected="false" data-tab="register">
+          <span>Đăng Ký</span>
+        </button>
+      </div>
+
+      <!-- Notification Toast inside modal -->
+      <div class="auth-feedback hidden" id="authFeedback"></div>
+
+      <!-- LOGIN FORM -->
+      <form id="loginForm" class="auth-form" autocomplete="on">
+        <div class="form-group">
+          <label class="form-label" for="loginEmail">Email hoặc Tên đăng nhập</label>
+          <div class="auth-input-wrap">
+            <span class="input-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            </span>
+            <input type="text" id="loginEmail" class="auth-input" placeholder="trader@botcrypto.pro" required autocomplete="username">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="label-row-split">
+            <label class="form-label" for="loginPassword">Mật khẩu</label>
+            <a href="javascript:void(0)" class="forgot-pwd-link" id="forgotPwdLink">Quên mật khẩu?</a>
+          </div>
+          <div class="auth-input-wrap">
+            <span class="input-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </span>
+            <input type="password" id="loginPassword" class="auth-input" placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" class="pwd-toggle-btn" data-target="loginPassword" title="Ẩn/Hiện mật khẩu">👁️</button>
+          </div>
+        </div>
+
+        <div class="form-remember-row">
+          <label class="remember-label">
+            <input type="checkbox" id="loginRemember" checked>
+            <span>Ghi nhớ đăng nhập</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-auth-submit" id="loginSubmitBtn">
+          <span>Đăng Nhập Ngay</span>
+        </button>
+
+        <div class="auth-divider">
+          <span>HOẶC</span>
+        </div>
+
+        <button type="button" class="btn-google-login" id="googleLoginBtn">
+          <svg class="google-icon" width="18" height="18" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.04 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+          </svg>
+          <span>Đăng nhập bằng Gmail (Google)</span>
+        </button>
+      </form>
+
+      <!-- REGISTER FORM -->
+      <form id="registerForm" class="auth-form hidden" autocomplete="on">
+        <div class="form-group">
+          <label class="form-label" for="regUsername">Biệt danh Trader (Username)</label>
+          <div class="auth-input-wrap">
+            <span class="input-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </span>
+            <input type="text" id="regUsername" class="auth-input" placeholder="Ví dụ: SatoshiTrader" required minlength="3" autocomplete="username">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regEmail">Địa chỉ Email</label>
+          <div class="auth-input-wrap">
+            <span class="input-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            </span>
+            <input type="email" id="regEmail" class="auth-input" placeholder="trader@domain.com" required autocomplete="email">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regPassword">Mật khẩu</label>
+          <div class="auth-input-wrap">
+            <span class="input-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </span>
+            <input type="password" id="regPassword" class="auth-input" placeholder="Tối thiểu 6 ký tự" required minlength="6" autocomplete="new-password">
+            <button type="button" class="pwd-toggle-btn" data-target="regPassword" title="Ẩn/Hiện mật khẩu">👁️</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regConfirmPassword">Xác nhận Mật khẩu</label>
+          <div class="auth-input-wrap">
+            <span class="input-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </span>
+            <input type="password" id="regConfirmPassword" class="auth-input" placeholder="Nhập lại mật khẩu" required minlength="6" autocomplete="new-password">
+            <button type="button" class="pwd-toggle-btn" data-target="regConfirmPassword" title="Ẩn/Hiện mật khẩu">👁️</button>
+          </div>
+        </div>
+
+        <div class="form-terms-row">
+          <label class="terms-label">
+            <input type="checkbox" id="regTerms" required checked>
+            <span>Tôi đồng ý với Điều khoản dịch vụ và Cảnh báo rủi ro giao dịch</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-auth-submit" id="regSubmitBtn">
+          <span>Tạo Tài Khoản Trader</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- SETTINGS MODAL (CÀI ĐẶT BỘ LỌC VÀ NHẬN TÍN HIỆU 15P, 30P, 1H, 4H)       -->
+  <!-- ========================================================================= -->
+  <div class="modal-overlay hidden" id="settingsModalOverlay" aria-modal="true" role="dialog">
+    <div class="settings-modal" id="settingsModal">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-icon-wrap">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </div>
+          <div>
+            <h2 class="modal-title">Cài Đặt Bộ Lọc &amp; Nhận Tín Hiệu</h2>
+            <p class="modal-desc">Quản lý nhận tín hiệu theo từng khung giờ riêng biệt và tùy chỉnh các ngưỡng lọc.</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="closeSettingsBtn" aria-label="Đóng cài đặt">✕</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <!-- SECTION 1: TIMEFRAMES SWITCHES -->
+        <div class="settings-section">
+          <div class="section-title-wrap">
+            <span class="section-badge">1</span>
+            <div>
+              <h3 class="section-heading">Cấu Hình Khung Vào Lệnh (30p • 1h • 4h)</h3>
+              <p class="section-sub">Khung 15p chỉ dùng để xem và xác nhận phụ. Vào lệnh chỉ kích hoạt khi khung 30p, 1h hoặc 4h xác nhận.</p>
+            </div>
+          </div>
+
+          <div class="tf-toggles-grid">
+            <!-- 15m Info Card (Chỉ xem và xác nhận) -->
+            <div class="tf-toggle-card card-15m" id="cardTf15m" style="border: 1px dashed rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.04);">
+              <div class="tf-toggle-info">
+                <span class="tf-badge-pill tf-15m-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">15p (15m)</span>
+                <div>
+                  <div class="tf-card-title">Khung 15 Phút <span style="font-size: 11px; color: #38bdf8; font-weight: normal; margin-left: 4px;">(Chỉ Xem &amp; Xác Nhận)</span></div>
+                  <div class="tf-card-desc">Dùng quan sát động lượng &amp; xác nhận phụ, KHÔNG vào lệnh</div>
+                </div>
+              </div>
+              <div class="tf-toggle-action">
+                <span class="tf-status-text" id="statusText15m" style="color: #38bdf8;">Chỉ xác nhận</span>
+                <label class="switch" style="opacity: 0.6; pointer-events: none;" title="15p chỉ dùng xem/xác nhận, không dùng làm khung vào lệnh">
+                  <input type="checkbox" id="toggleTf15m" checked disabled>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 30m Toggle Card -->
+            <div class="tf-toggle-card card-30m" id="cardTf30m">
+              <div class="tf-toggle-info">
+                <span class="tf-badge-pill tf-30m-badge">30p (30m)</span>
+                <div>
+                  <div class="tf-card-title">Khung 30 Phút</div>
+                  <div class="tf-card-desc">Intraday ngắn hạn, xác nhận động lượng</div>
+                </div>
+              </div>
+              <div class="tf-toggle-action">
+                <span class="tf-status-text" id="statusText30m">Đang nhận</span>
+                <label class="switch">
+                  <input type="checkbox" id="toggleTf30m" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 1h Toggle Card -->
+            <div class="tf-toggle-card card-1h" id="cardTf1h">
+              <div class="tf-toggle-info">
+                <span class="tf-badge-pill tf-1h-badge">1h (60m)</span>
+                <div>
+                  <div class="tf-card-title">Khung 1 Giờ</div>
+                  <div class="tf-card-desc">Khung cơ sở tiêu chuẩn, lọc nhiễu tốt</div>
+                </div>
+              </div>
+              <div class="tf-toggle-action">
+                <span class="tf-status-text" id="statusText1h">Đang nhận</span>
+                <label class="switch">
+                  <input type="checkbox" id="toggleTf1h" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 4h Toggle Card -->
+            <div class="tf-toggle-card card-4h" id="cardTf4h">
+              <div class="tf-toggle-info">
+                <span class="tf-badge-pill tf-4h-badge">4h (240m)</span>
+                <div>
+                  <div class="tf-card-title">Khung 4 Giờ</div>
+                  <div class="tf-card-desc">Xu hướng lớn / Swing, độ tin cậy cao nhất</div>
+                </div>
+              </div>
+              <div class="tf-toggle-action">
+                <span class="tf-status-text" id="statusText4h">Đang nhận</span>
+                <label class="switch">
+                  <input type="checkbox" id="toggleTf4h" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: TECHNICAL THRESHOLDS -->
+        <div class="settings-section">
+          <div class="section-title-wrap">
+            <span class="section-badge">2</span>
+            <div>
+              <h3 class="section-heading">Ngưỡng Lọc Kỹ Thuật Tập Trung</h3>
+              <p class="section-sub">Chỉ lưu các kèo thỏa mãn đồng thời cả 3 tiêu chí dưới đây.</p>
+            </div>
+          </div>
+
+          <div class="threshold-inputs-grid">
+            <div class="input-card">
+              <label for="cfgMinWinRate" class="input-label">
+                <span>Tối thiểu Win Rate (%)</span>
+                <span class="input-hint">Mặc định: 42.0%</span>
+              </label>
+              <div class="input-number-wrap">
+                <input type="number" id="cfgMinWinRate" step="0.5" min="0" max="100" value="42.0">
+                <span class="input-unit">%</span>
+              </div>
+            </div>
+
+            <div class="input-card">
+              <label for="cfgMinProfitFactor" class="input-label">
+                <span>Tối thiểu Profit Factor</span>
+                <span class="input-hint">Mặc định: 0.80</span>
+              </label>
+              <div class="input-number-wrap">
+                <input type="number" id="cfgMinProfitFactor" step="0.05" min="0" max="10" value="0.80">
+                <span class="input-unit">PF</span>
+              </div>
+            </div>
+
+            <div class="input-card">
+              <label for="cfgMinTotalPnL" class="input-label">
+                <span>Tối thiểu Total PnL ($)</span>
+                <span class="input-hint">Mặc định: $0</span>
+              </label>
+              <div class="input-number-wrap">
+                <input type="number" id="cfgMinTotalPnL" step="10" min="-1000" max="100000" value="0.0">
+                <span class="input-unit">$</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: SYSTEM & NOTIFICATIONS -->
+        <div class="settings-section">
+          <div class="section-title-wrap">
+            <span class="section-badge">3</span>
+            <div>
+              <h3 class="section-heading">Tùy Chọn Thông Báo &amp; Làm Mới</h3>
+              <p class="section-sub">Thiết lập âm thanh cảnh báo và tần suất cập nhật dữ liệu tự động.</p>
+            </div>
+          </div>
+
+          <div class="options-row">
+            <div class="option-item">
+              <div class="option-info">
+                <div class="option-title">Âm thanh chuông báo (Chime)</div>
+                <div class="option-desc">Phát âm thanh nhẹ khi phát hiện có kèo mới đạt chuẩn</div>
+              </div>
+              <div class="option-controls">
+                <button type="button" class="btn-test-sound" id="btnTestSound" title="Thử nghe âm thanh">
+                  🔊 Thử âm
+                </button>
+                <label class="switch">
+                  <input type="checkbox" id="cfgSoundAlert" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="option-item">
+              <div class="option-info">
+                <div class="option-title">Thời gian tự động làm mới</div>
+                <div class="option-desc">Chu kỳ truy vấn dữ liệu setup mới từ máy chủ</div>
+              </div>
+              <div class="option-controls">
+                <select id="cfgRefreshInterval" class="custom-select">
+                  <option value="10">10 giây (Nhanh)</option>
+                  <option value="30" selected>30 giây (Chuẩn)</option>
+                  <option value="60">60 giây (Tiết kiệm)</option>
+                  <option value="0">Tắt tự làm mới</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <div class="footer-left">
+          <button type="button" class="btn-ghost" id="resetDefaultSettingsBtn">
+            Khôi phục mặc định
+          </button>
+        </div>
+        <div class="footer-right">
+          <button type="button" class="btn-secondary" id="cancelSettingsBtn">
+            Hủy bỏ
+          </button>
+          <button type="button" class="btn-primary" id="saveSettingsBtn">
+            <span class="btn-spinner hidden" id="saveSpinner"></span>
+            <span>Lưu Cấu Hình</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- GSAP 3.12 (GreenSock Animation Platform) - Tham khảo repo: https://github.com/greensock/GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <!-- Fuse.js 7.0 (Fuzzy Search Engine) - Tham khảo repo: https://github.com/krisk/Fuse -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/7.0.0/fuse.min.js"></script>
+
+  <!-- TradingView Lightweight Charts - Tham khảo repo: https://github.com/tradingview/lightweight-charts -->
+  <script src="vendor/lightweight-charts.standalone.production.js"></script>
+  <script>
+    if (!window.LightweightCharts) {
+      document.write('<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"><\/script>');
+    }
+  </script>
+  <!-- Interactive Moon Spotlight & Video Loop Synchronizer -->
+  <script src="moon-scratch.js"></script>
+  <script src="app.js?v=9"></script>
+</body>
+</html>
