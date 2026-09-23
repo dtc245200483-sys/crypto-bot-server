@@ -335,6 +335,16 @@ app.get('/api/indicator-data', (req, res) => {
     });
   }
 
+  // Chỉ trả về dữ liệu webhook nếu còn mới trong vòng 30 phút
+  const MAX_WEBHOOK_AGE_MS = 30 * 60 * 1000;
+  const age = Date.now() - (latest.receivedAt || latest.timestamp || 0);
+  if (age > MAX_WEBHOOK_AGE_MS) {
+    return res.status(404).json({
+      success: false,
+      message: `Dữ liệu alert webhook cho ${symbol} [${timeframe}] đã hết hạn (${Math.round(age / 60000)} phút trước).`
+    });
+  }
+
   res.json(latest);
 });
 
