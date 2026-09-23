@@ -2536,6 +2536,8 @@ const AuthManager = {
               await this.handleGoogleAccessToken(tokenResponse.access_token);
             } else if (tokenResponse && tokenResponse.error) {
               console.warn('[Google OAuth Error]', tokenResponse);
+              const errMsg = tokenResponse.error_description || tokenResponse.error;
+              showToast(`Lỗi đăng nhập Google: ${errMsg}`, 'error');
             }
           }
         });

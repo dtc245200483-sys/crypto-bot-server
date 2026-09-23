@@ -43,16 +43,18 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdnjs.cloudflare.com", "https://unpkg.com", "https://accounts.google.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdnjs.cloudflare.com", "https://unpkg.com", "https://accounts.google.com", "https://apis.google.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
       imgSrc: ["'self'", "data:", "https://*.googleusercontent.com", "https://www.okx.com", "https://lh3.googleusercontent.com"],
-      connectSrc: ["'self'", "https://www.okx.com", "https://accounts.google.com", "https://www.googleapis.com", "http://localhost:*", "http://127.0.0.1:*"],
-      frameSrc: ["'self'", "https://accounts.google.com"],
+      connectSrc: ["'self'", "https://www.okx.com", "https://accounts.google.com", "https://oauth2.googleapis.com", "https://www.googleapis.com", "https://apis.google.com", "http://localhost:*", "http://127.0.0.1:*"],
+      frameSrc: ["'self'", "https://accounts.google.com", "https://content-autofill.googleapis.com"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null
     }
   },
+  // BẮT BUỘC: Cho phép Popup Google OAuth giao tiếp truyền Access Token về trang web
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
   crossOriginEmbedderPolicy: false,
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
