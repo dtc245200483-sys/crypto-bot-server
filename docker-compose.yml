@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  crypto-bot-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: crypto-bot-server
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    environment:
+      - NODE_ENV=production
+      - PORT=8787
+      - HOST=0.0.0.0
+      - DB_PATH=/app/data/orchestrator.db
+      - LOG_FILE=/app/logs/app.log
+      - JWT_SECRET=bot_crypto_pro_jwt_secret_key_2026_super_safe
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8787/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

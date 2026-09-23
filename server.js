@@ -13,6 +13,8 @@ const path = require('path');
 const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const { OAuth2Client } = require('google-auth-library');
 const jwt = require('jsonwebtoken');
 const logger = require('./logger');
@@ -23,13 +25,61 @@ const app = express();
 const PORT = parseInt(process.env.PORT, 10) || 8787;
 const HOST = process.env.HOST || '0.0.0.0';
 
+// Tin tưởng proxy ngược (Reverse Proxy: Render, Cloudflare, Nginx, Docker)
+app.set('trust proxy', 1);
+
+// Vô hiệu hóa header X-Powered-By tránh lộ thông tin công nghệ
+app.disable('x-powered-by');
+
 // Cấu hình Google OAuth 2.0 Client & JWT
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '767037038958-6on9qqvnpcifsigfchaj2veipgtjh0hc.apps.googleusercontent.com';
 const googleOAuthClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 const JWT_SECRET = process.env.JWT_SECRET || 'bot_crypto_pro_jwt_secret_key_2026_super_safe';
 
+// =============================================================================
+// BẢO MẬT & MÃ HÓA HTTP HEADERS (HELMET)
+// =============================================================================
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdnjs.cloudflare.com", "https://unpkg.com", "https://accounts.google.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+      imgSrc: ["'self'", "data:", "https://*.googleusercontent.com", "https://www.okx.com", "https://lh3.googleusercontent.com"],
+      connectSrc: ["'self'", "https://www.okx.com", "https://accounts.google.com", "https://www.googleapis.com", "http://localhost:*", "http://127.0.0.1:*"],
+      frameSrc: ["'self'", "https://accounts.google.com"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null
+    }
+  },
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// =============================================================================
+// RATE LIMITING - BẢO VỆ CHỐNG TẤN CÔNG DDOS & BRUTE FORCE
+// =============================================================================
+const apiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 phút
+  max: 400, // Tối đa 400 requests / phút
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Phát hiện tần suất truy vấn bất thường. Vui lòng thử lại sau 1 phút.' }
+});
+app.use('/api/', apiLimiter);
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 phút
+  max: 30, // Tối đa 30 lần đăng nhập / 15 phút
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Đăng nhập quá số lần cho phép. Vui lòng đợi 15 phút.' }
+});
+app.use('/api/auth/', authLimiter);
+
 // Cấu hình Middleware
-app.use(cors({ origin: '*' })); // Cho phép Extension gọi API nội bộ
+app.use(cors({ origin: '*' })); // Cho phép Extension & Client gọi API
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
