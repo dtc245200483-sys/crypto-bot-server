@@ -191,6 +191,9 @@ const elements = {
   cfgTurtleWinRate: document.getElementById('cfgTurtleWinRate'),
   cfgTurtleAvgProfit: document.getElementById('cfgTurtleAvgProfit'),
   cfgTurtleTotalProfit: document.getElementById('cfgTurtleTotalProfit'),
+  cfgTurtleTf30m: document.getElementById('cfgTurtleTf30m'),
+  cfgTurtleTf1h: document.getElementById('cfgTurtleTf1h'),
+  cfgTurtleTf4h: document.getElementById('cfgTurtleTf4h'),
 
   // Fallbacks & Sound/Refresh
   cfgMinWinRate: document.getElementById('cfgLuxWinRate'),
@@ -1371,6 +1374,11 @@ function applyConfigToUI() {
   if (elements.cfgTurtleAvgProfit) elements.cfgTurtleAvgProfit.value = turtleCfg.minAvgProfit !== undefined ? turtleCfg.minAvgProfit : 0.10;
   if (elements.cfgTurtleTotalProfit) elements.cfgTurtleTotalProfit.value = turtleCfg.minTotalProfit !== undefined ? turtleCfg.minTotalProfit : 0.0;
 
+  const turtleTfs = (turtleCfg.allowedTimeframes || ['30m', '1h', '4h']).map(t => String(t).toLowerCase());
+  if (elements.cfgTurtleTf30m) elements.cfgTurtleTf30m.checked = turtleTfs.includes('30m');
+  if (elements.cfgTurtleTf1h) elements.cfgTurtleTf1h.checked = turtleTfs.includes('1h');
+  if (elements.cfgTurtleTf4h) elements.cfgTurtleTf4h.checked = turtleTfs.includes('4h');
+
   updateIndicatorStatusLabels();
 
   if (elements.cfgSoundAlert) elements.cfgSoundAlert.checked = !!systemConfig.soundAlert;
@@ -1461,6 +1469,11 @@ async function saveConfigToServer() {
       return;
     }
 
+    const turtleTfs = [];
+    if (elements.cfgTurtleTf30m?.checked) turtleTfs.push('30m');
+    if (elements.cfgTurtleTf1h?.checked) turtleTfs.push('1h');
+    if (elements.cfgTurtleTf4h?.checked) turtleTfs.push('4h');
+
     const payload = {
       thresholds: {
         luxalgo: {
@@ -1473,7 +1486,8 @@ async function saveConfigToServer() {
           enabled: elements.cfgTurtleEnabled ? elements.cfgTurtleEnabled.checked : true,
           minWinRate: parseFloat(elements.cfgTurtleWinRate?.value) || 40.0,
           minAvgProfit: parseFloat(elements.cfgTurtleAvgProfit?.value) || 0.10,
-          minTotalProfit: parseFloat(elements.cfgTurtleTotalProfit?.value) || 0.0
+          minTotalProfit: parseFloat(elements.cfgTurtleTotalProfit?.value) || 0.0,
+          allowedTimeframes: turtleTfs.length > 0 ? turtleTfs : ['30m', '1h', '4h']
         }
       },
       allowedBaseTimeframes: selectedTfs,
@@ -1641,8 +1655,13 @@ function getFilteredAndSortedSetups() {
     // 3. Lọc theo ngưỡng kỹ thuật của từng chỉ báo độc lập
     const isTurtle = s.indicator === 'turtle_soup';
     if (isTurtle) {
-      const cfgTurtle = systemConfig.thresholds?.turtle_soup || { enabled: true, minWinRate: 40.0, minAvgProfit: 0.10, minTotalProfit: 0.0 };
+      const cfgTurtle = systemConfig.thresholds?.turtle_soup || { enabled: true, minWinRate: 40.0, minAvgProfit: 0.10, minTotalProfit: 0.0, allowedTimeframes: ['30m', '1h', '4h'] };
       if (cfgTurtle.enabled === false) return false;
+
+      // Turtle Soup tìm độc lập từng khung 30p, 1h, 4h (không phụ thuộc đồng thuận đa khung)
+      const turtleAllowed = (cfgTurtle.allowedTimeframes || ['30m', '1h', '4h']).map(t => String(t).toLowerCase());
+      if (!turtleAllowed.includes(baseTf)) return false;
+
       const minWr = Number(cfgTurtle.minWinRate) || 0;
       const minAvg = Number(cfgTurtle.minAvgProfit) || 0;
       const minTot = Number(cfgTurtle.minTotalProfit) || 0;
@@ -1655,7 +1674,10 @@ function getFilteredAndSortedSetups() {
       if (minAvg > 0 && avg < minAvg) return false;
       if (tot < minTot) return false;
     } else {
-      // LuxAlgo (hoặc mặc định)
+      // LuxAlgo (hoặc mặc định) - lọc theo khung vào lệnh allowedBaseTimeframes
+      const luxAllowed = (systemConfig.allowedBaseTimeframes || ['30m', '1h', '4h']).map(t => String(t).toLowerCase());
+      if (!luxAllowed.includes(baseTf)) return false;
+
       const cfgLux = systemConfig.thresholds?.luxalgo || systemConfig.thresholds || { enabled: true, minWinRate: 36.0, minProfitFactor: 0.80, minTotalPnL: 0.0 };
       if (cfgLux.enabled === false) return false;
       const minWr = Number(cfgLux.minWinRate ?? systemConfig.thresholds?.minWinRate) || 0;
@@ -2456,6 +2478,10 @@ elements.resetDefaultSettingsBtn.addEventListener('click', () => {
     if (elements.cfgTurtleWinRate) elements.cfgTurtleWinRate.value = '40.0';
     if (elements.cfgTurtleAvgProfit) elements.cfgTurtleAvgProfit.value = '0.10';
     if (elements.cfgTurtleTotalProfit) elements.cfgTurtleTotalProfit.value = '0.0';
+
+    if (elements.cfgTurtleTf30m) elements.cfgTurtleTf30m.checked = true;
+    if (elements.cfgTurtleTf1h) elements.cfgTurtleTf1h.checked = true;
+    if (elements.cfgTurtleTf4h) elements.cfgTurtleTf4h.checked = true;
 
     updateIndicatorStatusLabels();
 

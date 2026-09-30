@@ -10,7 +10,12 @@
       "enabled": true,
       "minWinRate": 40,
       "minAvgProfit": 0.1,
-      "minTotalProfit": 0
+      "minTotalProfit": 0,
+      "allowedTimeframes": [
+        "30m",
+        "1h",
+        "4h"
+      ]
     },
     "minWinRate": 36,
     "minAvgProfit": 0.1,

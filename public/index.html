@@ -1389,8 +1389,8 @@
           <div class="section-title-wrap">
             <span class="section-badge">1</span>
             <div>
-              <h3 class="section-heading">Cấu Hình Khung Vào Lệnh (30p • 1h • 4h)</h3>
-              <p class="section-sub">Khung 15p chỉ dùng để xem và xác nhận phụ. Vào lệnh chỉ kích hoạt khi khung 30p, 1h hoặc 4h xác nhận.</p>
+              <h3 class="section-heading">Cấu Hình Khung Vào Lệnh LuxAlgo (30p • 1h • 4h)</h3>
+              <p class="section-sub">Khung 15p dùng xác nhận phụ. Các khung 30p, 1h, 4h dùng vào lệnh đồng thuận cho LuxAlgo. Turtle Soup tìm độc lập từng khung ở Mục 2.</p>
             </div>
           </div>
 
@@ -1586,6 +1586,28 @@
                     <input type="number" id="cfgTurtleTotalProfit" step="0.5" min="0" max="500" value="0.0">
                     <span class="input-unit">%</span>
                   </div>
+                </div>
+              </div>
+
+              <!-- Khung tìm riêng cho Turtle Soup (Độc lập, không phụ thuộc đồng thuận) -->
+              <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(6, 182, 212, 0.15); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                <div>
+                  <span style="font-size: 12px; font-weight: 700; color: #06b6d4;">Khung tìm riêng (Không dùng đồng thuận):</span>
+                  <span style="font-size: 11px; color: var(--text-faint); display: block;">Chỉ cần khung này có tín hiệu và đạt ngưỡng là nhận</span>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <label class="switch-pill-label" style="display: flex; align-items: center; gap: 6px; cursor: pointer; background: rgba(255,255,255,0.04); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(6, 182, 212, 0.3);">
+                    <input type="checkbox" id="cfgTurtleTf30m" checked>
+                    <span style="font-size: 11px; font-weight: 700; color: #06b6d4;">30p</span>
+                  </label>
+                  <label class="switch-pill-label" style="display: flex; align-items: center; gap: 6px; cursor: pointer; background: rgba(255,255,255,0.04); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(6, 182, 212, 0.3);">
+                    <input type="checkbox" id="cfgTurtleTf1h" checked>
+                    <span style="font-size: 11px; font-weight: 700; color: #06b6d4;">1h</span>
+                  </label>
+                  <label class="switch-pill-label" style="display: flex; align-items: center; gap: 6px; cursor: pointer; background: rgba(255,255,255,0.04); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(6, 182, 212, 0.3);">
+                    <input type="checkbox" id="cfgTurtleTf4h" checked>
+                    <span style="font-size: 11px; font-weight: 700; color: #06b6d4;">4h</span>
+                  </label>
                 </div>
               </div>
             </div>

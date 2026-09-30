@@ -278,7 +278,10 @@ app.post('/api/config', (req, res) => {
         enabled: typeof turtle.enabled === 'boolean' ? turtle.enabled : (curTurtle.enabled !== false),
         minWinRate: turtle.minWinRate !== undefined ? Math.max(0, Number(turtle.minWinRate) || 0) : (curTurtle.minWinRate !== undefined ? curTurtle.minWinRate : 40),
         minAvgProfit: turtle.minAvgProfit !== undefined ? Number(turtle.minAvgProfit) || 0 : (curTurtle.minAvgProfit !== undefined ? curTurtle.minAvgProfit : 0.1),
-        minTotalProfit: turtle.minTotalProfit !== undefined ? Number(turtle.minTotalProfit) || 0 : (curTurtle.minTotalProfit !== undefined ? curTurtle.minTotalProfit : 0)
+        minTotalProfit: turtle.minTotalProfit !== undefined ? Number(turtle.minTotalProfit) || 0 : (curTurtle.minTotalProfit !== undefined ? curTurtle.minTotalProfit : 0),
+        allowedTimeframes: Array.isArray(turtle.allowedTimeframes)
+          ? turtle.allowedTimeframes.map(tf => String(tf).toLowerCase().trim()).filter(tf => ['30m', '1h', '4h'].includes(tf))
+          : (curTurtle.allowedTimeframes || ['30m', '1h', '4h'])
       };
 
       config.thresholds = {
