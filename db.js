@@ -129,6 +129,11 @@ function initializeTables() {
     CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
   `);
 
+  // Tự động migration thêm các cột nếu chưa có
+  try { db.exec('ALTER TABLE setups ADD COLUMN avg_profit REAL;'); } catch (e) {}
+  try { db.exec('ALTER TABLE setups ADD COLUMN total_profit REAL;'); } catch (e) {}
+  try { db.exec("ALTER TABLE setups ADD COLUMN indicator TEXT DEFAULT 'luxalgo';"); } catch (e) {}
+
   logger.info('[Database] Khởi tạo cấu trúc bảng SQLite thành công.');
 }
 
@@ -148,14 +153,18 @@ function insertSetup(s) {
   const stmt = db.prepare(`
     INSERT INTO setups (
       symbol, base_timeframe, signal, entry, tp1, tp2, tp3, sl,
-      win_rate, profit_factor, total_pnl, confirmed_by, scanned_at, created_at, status
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      win_rate, profit_factor, total_pnl, confirmed_by, scanned_at, created_at, status,
+      avg_profit, total_profit, indicator
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const confirmedByStr = Array.isArray(s.confirmedBy) ? JSON.stringify(s.confirmedBy) : (s.confirmedBy || '["45m","30m"]');
   const scannedAt = s.scannedAt || Date.now();
   const createdAt = Date.now();
   const status = s.status || 'active';
+  const avgProfit = (s.avgProfit !== undefined && s.avgProfit !== null) ? Number(s.avgProfit) : (Number(s.avg_profit) || 0);
+  const totalProfit = (s.totalProfit !== undefined && s.totalProfit !== null) ? Number(s.totalProfit) : (Number(s.total_profit) || 0);
+  const indicator = s.indicator || 'luxalgo';
 
   const result = stmt.run(
     s.symbol,
@@ -172,7 +181,10 @@ function insertSetup(s) {
     confirmedByStr,
     scannedAt,
     createdAt,
-    status
+    status,
+    avgProfit,
+    totalProfit,
+    indicator
   );
 
   return result.lastInsertRowid;
@@ -212,6 +224,11 @@ function getSetups(filters = {}) {
     params.push(filters.baseTimeframe);
   }
 
+  if (filters.indicator && filters.indicator !== 'all') {
+    query += ' AND s.indicator = ?';
+    params.push(filters.indicator.toLowerCase());
+  }
+
   query += ' ORDER BY s.scanned_at DESC';
 
   const limit = Math.min(Math.max(parseInt(filters.limit, 10) || 500, 1), 1000);
@@ -240,6 +257,9 @@ function getSetups(filters = {}) {
       winRate: r.win_rate,
       profitFactor: r.profit_factor,
       totalPnL: r.total_pnl,
+      avgProfit: (r.avg_profit !== undefined && r.avg_profit !== null) ? r.avg_profit : null,
+      totalProfit: (r.total_profit !== undefined && r.total_profit !== null) ? r.total_profit : null,
+      indicator: r.indicator || 'luxalgo',
       confirmedBy,
       scannedAt: r.scanned_at,
       createdAt: r.created_at,

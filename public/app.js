@@ -49,7 +49,19 @@ let lookupHasLoadedOnce = false;
 
 let systemConfig = {
   thresholds: {
-    minWinRate: 42.0,
+    luxalgo: {
+      enabled: true,
+      minWinRate: 36.0,
+      minProfitFactor: 0.8,
+      minTotalPnL: 0.0
+    },
+    turtle_soup: {
+      enabled: true,
+      minWinRate: 40.0,
+      minAvgProfit: 0.10,
+      minTotalProfit: 0.0
+    },
+    minWinRate: 36.0,
     minProfitFactor: 0.8,
     minTotalPnL: 0.0
   },
@@ -167,9 +179,25 @@ const elements = {
   statusText1h: document.getElementById('statusText1h'),
   statusText4h: document.getElementById('statusText4h'),
 
-  cfgMinWinRate: document.getElementById('cfgMinWinRate'),
-  cfgMinProfitFactor: document.getElementById('cfgMinProfitFactor'),
-  cfgMinTotalPnL: document.getElementById('cfgMinTotalPnL'),
+  // Modal Fields - Indicator Cards
+  cfgLuxEnabled: document.getElementById('cfgLuxEnabled'),
+  cfgLuxStatusText: document.getElementById('cfgLuxStatusText'),
+  cfgLuxWinRate: document.getElementById('cfgLuxWinRate'),
+  cfgLuxProfitFactor: document.getElementById('cfgLuxProfitFactor'),
+  cfgLuxTotalPnL: document.getElementById('cfgLuxTotalPnL'),
+
+  cfgTurtleEnabled: document.getElementById('cfgTurtleEnabled'),
+  cfgTurtleStatusText: document.getElementById('cfgTurtleStatusText'),
+  cfgTurtleWinRate: document.getElementById('cfgTurtleWinRate'),
+  cfgTurtleAvgProfit: document.getElementById('cfgTurtleAvgProfit'),
+  cfgTurtleTotalProfit: document.getElementById('cfgTurtleTotalProfit'),
+
+  // Fallbacks & Sound/Refresh
+  cfgMinWinRate: document.getElementById('cfgLuxWinRate'),
+  cfgMinProfitFactor: document.getElementById('cfgLuxProfitFactor'),
+  cfgMinTotalPnL: document.getElementById('cfgLuxTotalPnL'),
+  cfgMinAvgProfit: document.getElementById('cfgTurtleAvgProfit'),
+  cfgMinTotalProfit: document.getElementById('cfgTurtleTotalProfit'),
   cfgSoundAlert: document.getElementById('cfgSoundAlert'),
   cfgRefreshInterval: document.getElementById('cfgRefreshInterval'),
   btnTestSound: document.getElementById('btnTestSound'),
@@ -1285,9 +1313,18 @@ function applyConfigToUI() {
   updateHdrPill(elements.hdrTf4h, '4h');
 
   // 2. Cập nhật Footer
-  if (elements.footWr) elements.footWr.innerHTML = `Win Rate &gt; <b>${systemConfig.thresholds.minWinRate}%</b>`;
-  if (elements.footPf) elements.footPf.innerHTML = `Profit Factor &gt; <b>${systemConfig.thresholds.minProfitFactor}</b>`;
-  if (elements.footPnl) elements.footPnl.innerHTML = `Total PnL &gt; <b>$${systemConfig.thresholds.minTotalPnL}</b>`;
+  const luxCfg = systemConfig.thresholds?.luxalgo || systemConfig.thresholds || {};
+  const turtleCfg = systemConfig.thresholds?.turtle_soup || {};
+
+  if (elements.footWr) {
+    elements.footWr.innerHTML = `Win Rate &gt; <b>Lux ${luxCfg.minWinRate ?? 36}% | Turtle ${turtleCfg.minWinRate ?? 40}%</b>`;
+  }
+  if (elements.footPf) {
+    elements.footPf.innerHTML = `PF &gt; <b>${luxCfg.minProfitFactor ?? 0.8}</b> • Avg &gt; <b>${turtleCfg.minAvgProfit ?? 0.1}%</b>`;
+  }
+  if (elements.footPnl) {
+    elements.footPnl.innerHTML = `PnL &gt; <b>$${luxCfg.minTotalPnL ?? 0}</b> • Tot &gt; <b>${turtleCfg.minTotalProfit ?? 0}%</b>`;
+  }
 
   const activeNames = allowed.map(tf => tf.replace('m', 'p')).join(', ');
   if (elements.footActiveTfs) {
@@ -1296,9 +1333,11 @@ function applyConfigToUI() {
 
   // Cập nhật chuẩn dữ liệu ở Support Footer
   if (elements.supportThresholdVal && systemConfig.thresholds) {
-    const minWr = systemConfig.thresholds.minWinRate;
-    const minPf = Number(systemConfig.thresholds.minProfitFactor).toFixed(2);
-    elements.supportThresholdVal.textContent = `Win Rate > ${minWr}% • PF > ${minPf}`;
+    const minLuxWr = luxCfg.minWinRate ?? 36;
+    const minLuxPf = Number(luxCfg.minProfitFactor ?? 0.8).toFixed(2);
+    const minTurtleWr = turtleCfg.minWinRate ?? 40;
+    const minTurtleAvg = Number(turtleCfg.minAvgProfit ?? 0.1).toFixed(2);
+    elements.supportThresholdVal.textContent = `Lux: WR>${minLuxWr}% PF>${minLuxPf} • Turtle: WR>${minTurtleWr}% Avg>${minTurtleAvg}%`;
   }
 
   // 3. Cập nhật Icon âm thanh
@@ -1320,11 +1359,43 @@ function applyConfigToUI() {
 
   updateToggleCardStyles();
 
-  if (elements.cfgMinWinRate) elements.cfgMinWinRate.value = systemConfig.thresholds.minWinRate;
-  if (elements.cfgMinProfitFactor) elements.cfgMinProfitFactor.value = systemConfig.thresholds.minProfitFactor;
-  if (elements.cfgMinTotalPnL) elements.cfgMinTotalPnL.value = systemConfig.thresholds.minTotalPnL;
+  // Đồng bộ thẻ 1: LuxAlgo Backtester MOD
+  if (elements.cfgLuxEnabled) elements.cfgLuxEnabled.checked = luxCfg.enabled !== false;
+  if (elements.cfgLuxWinRate) elements.cfgLuxWinRate.value = luxCfg.minWinRate !== undefined ? luxCfg.minWinRate : 36.0;
+  if (elements.cfgLuxProfitFactor) elements.cfgLuxProfitFactor.value = luxCfg.minProfitFactor !== undefined ? luxCfg.minProfitFactor : 0.80;
+  if (elements.cfgLuxTotalPnL) elements.cfgLuxTotalPnL.value = luxCfg.minTotalPnL !== undefined ? luxCfg.minTotalPnL : 0;
+
+  // Đồng bộ thẻ 2: Turtle Soup | Flux Charts
+  if (elements.cfgTurtleEnabled) elements.cfgTurtleEnabled.checked = turtleCfg.enabled !== false;
+  if (elements.cfgTurtleWinRate) elements.cfgTurtleWinRate.value = turtleCfg.minWinRate !== undefined ? turtleCfg.minWinRate : 40.0;
+  if (elements.cfgTurtleAvgProfit) elements.cfgTurtleAvgProfit.value = turtleCfg.minAvgProfit !== undefined ? turtleCfg.minAvgProfit : 0.10;
+  if (elements.cfgTurtleTotalProfit) elements.cfgTurtleTotalProfit.value = turtleCfg.minTotalProfit !== undefined ? turtleCfg.minTotalProfit : 0.0;
+
+  updateIndicatorStatusLabels();
+
   if (elements.cfgSoundAlert) elements.cfgSoundAlert.checked = !!systemConfig.soundAlert;
   if (elements.cfgRefreshInterval) elements.cfgRefreshInterval.value = String(systemConfig.refreshIntervalSec ?? 30);
+}
+
+function updateIndicatorStatusLabels() {
+  if (elements.cfgLuxStatusText && elements.cfgLuxEnabled) {
+    if (elements.cfgLuxEnabled.checked) {
+      elements.cfgLuxStatusText.textContent = 'Đang nhận';
+      elements.cfgLuxStatusText.style.color = '#00e676';
+    } else {
+      elements.cfgLuxStatusText.textContent = 'Tạm dừng';
+      elements.cfgLuxStatusText.style.color = 'var(--text-faint)';
+    }
+  }
+  if (elements.cfgTurtleStatusText && elements.cfgTurtleEnabled) {
+    if (elements.cfgTurtleEnabled.checked) {
+      elements.cfgTurtleStatusText.textContent = 'Đang nhận';
+      elements.cfgTurtleStatusText.style.color = '#00e676';
+    } else {
+      elements.cfgTurtleStatusText.textContent = 'Tạm dừng';
+      elements.cfgTurtleStatusText.style.color = 'var(--text-faint)';
+    }
+  }
 }
 
 function updateToggleCardStyles() {
@@ -1392,9 +1463,18 @@ async function saveConfigToServer() {
 
     const payload = {
       thresholds: {
-        minWinRate: parseFloat(elements.cfgMinWinRate.value) || 36.0,
-        minProfitFactor: parseFloat(elements.cfgMinProfitFactor.value) || 0.7,
-        minTotalPnL: parseFloat(elements.cfgMinTotalPnL.value) || 0.0
+        luxalgo: {
+          enabled: elements.cfgLuxEnabled ? elements.cfgLuxEnabled.checked : true,
+          minWinRate: parseFloat(elements.cfgLuxWinRate?.value) || 36.0,
+          minProfitFactor: parseFloat(elements.cfgLuxProfitFactor?.value) || 0.8,
+          minTotalPnL: parseFloat(elements.cfgLuxTotalPnL?.value) || 0.0
+        },
+        turtle_soup: {
+          enabled: elements.cfgTurtleEnabled ? elements.cfgTurtleEnabled.checked : true,
+          minWinRate: parseFloat(elements.cfgTurtleWinRate?.value) || 40.0,
+          minAvgProfit: parseFloat(elements.cfgTurtleAvgProfit?.value) || 0.10,
+          minTotalProfit: parseFloat(elements.cfgTurtleTotalProfit?.value) || 0.0
+        }
       },
       allowedBaseTimeframes: selectedTfs,
       requiredConfirmations: ['15m', '30m', '1h', '4h'],
@@ -1452,6 +1532,12 @@ function closeSettingsModal() {
 [elements.toggleTf15m, elements.toggleTf30m, elements.toggleTf1h, elements.toggleTf4h].forEach(sw => {
   if (sw) sw.addEventListener('change', updateToggleCardStyles);
 });
+if (elements.cfgLuxEnabled) {
+  elements.cfgLuxEnabled.addEventListener('change', updateIndicatorStatusLabels);
+}
+if (elements.cfgTurtleEnabled) {
+  elements.cfgTurtleEnabled.addEventListener('change', updateIndicatorStatusLabels);
+}
 
 // =============================================================================
 // THỐNG KÊ & BỘ ĐẾM
@@ -1505,7 +1591,9 @@ function updateMetricsAndDistribution(setups) {
   const allowed = systemConfig.allowedBaseTimeframes || ['30m', '1h', '4h'];
   const formattedTfNames = allowed.map(t => t.replace('m', 'p')).join(' • ');
   elements.totalSetupsSub.textContent = `Vào lệnh: ${formattedTfNames || 'Chưa bật'} (15p xác nhận)`;
-  elements.thresholdDisplaySub.textContent = `Ngưỡng: WR > ${systemConfig.thresholds.minWinRate}% • PF > ${systemConfig.thresholds.minProfitFactor}`;
+  const luxCfg = systemConfig.thresholds?.luxalgo || systemConfig.thresholds || {};
+  const turtleCfg = systemConfig.thresholds?.turtle_soup || {};
+  elements.thresholdDisplaySub.textContent = `Lux: WR > ${luxCfg.minWinRate ?? 36}% PF > ${luxCfg.minProfitFactor ?? 0.8} | Turtle: WR > ${turtleCfg.minWinRate ?? 40}% Avg > ${turtleCfg.minAvgProfit ?? 0.1}%`;
 }
 
 // =============================================================================
@@ -1550,18 +1638,38 @@ function getFilteredAndSortedSetups() {
     // 2. Khung 15p chỉ dùng để xem và xác nhận, không hiển thị làm kèo vào lệnh
     if (baseTf === '15m') return false;
 
-    // 3. Lọc theo ngưỡng kỹ thuật tập trung đã cài đặt (Win Rate, PF, Total PnL)
-    const minWr = Number(systemConfig.thresholds?.minWinRate) || 0;
-    const minPf = Number(systemConfig.thresholds?.minProfitFactor) || 0;
-    const minPnl = Number(systemConfig.thresholds?.minTotalPnL) || 0;
+    // 3. Lọc theo ngưỡng kỹ thuật của từng chỉ báo độc lập
+    const isTurtle = s.indicator === 'turtle_soup';
+    if (isTurtle) {
+      const cfgTurtle = systemConfig.thresholds?.turtle_soup || { enabled: true, minWinRate: 40.0, minAvgProfit: 0.10, minTotalProfit: 0.0 };
+      if (cfgTurtle.enabled === false) return false;
+      const minWr = Number(cfgTurtle.minWinRate) || 0;
+      const minAvg = Number(cfgTurtle.minAvgProfit) || 0;
+      const minTot = Number(cfgTurtle.minTotalProfit) || 0;
 
-    const wr = Number(s.winRate) || 0;
-    const pf = Number(s.profitFactor) || 0;
-    const pnl = Number(s.totalPnL) || 0;
+      const wr = Number(s.winRate) || 0;
+      const avg = Number(s.avgProfit !== undefined ? s.avgProfit : s.avg_profit) || 0;
+      const tot = Number(s.totalProfit !== undefined ? s.totalProfit : s.total_profit) || 0;
 
-    if (minWr > 0 && wr < minWr) return false;
-    if (minPf > 0 && pf < minPf) return false;
-    if (pnl < minPnl) return false;
+      if (minWr > 0 && wr < minWr) return false;
+      if (minAvg > 0 && avg < minAvg) return false;
+      if (tot < minTot) return false;
+    } else {
+      // LuxAlgo (hoặc mặc định)
+      const cfgLux = systemConfig.thresholds?.luxalgo || systemConfig.thresholds || { enabled: true, minWinRate: 36.0, minProfitFactor: 0.80, minTotalPnL: 0.0 };
+      if (cfgLux.enabled === false) return false;
+      const minWr = Number(cfgLux.minWinRate ?? systemConfig.thresholds?.minWinRate) || 0;
+      const minPf = Number(cfgLux.minProfitFactor ?? systemConfig.thresholds?.minProfitFactor) || 0;
+      const minPnl = Number(cfgLux.minTotalPnL ?? systemConfig.thresholds?.minTotalPnL) || 0;
+
+      const wr = Number(s.winRate) || 0;
+      const pf = Number(s.profitFactor) || 0;
+      const pnl = Number(s.totalPnL) || 0;
+
+      if (minWr > 0 && wr < minWr) return false;
+      if (minPf > 0 && pf < minPf) return false;
+      if (pnl < minPnl) return false;
+    }
 
     return true;
   });
@@ -1683,6 +1791,10 @@ function renderTable() {
     const pnl = Number(s.totalPnL) || 0;
     const wr = Number(s.winRate) || 0;
     const pf = Number(s.profitFactor) || 0;
+    const isTurtle = s.indicator === 'turtle_soup';
+    const indicatorBadgeHtml = isTurtle
+      ? `<span class="badge-indicator-pill turtle" style="background: rgba(6, 182, 212, 0.15); color: #06b6d4; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid rgba(6, 182, 212, 0.3); display: inline-flex; align-items: center; gap: 3px;">🐢 Turtle Soup</span>`
+      : `<span class="badge-indicator-pill lux" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid rgba(245, 158, 11, 0.3); display: inline-flex; align-items: center; gap: 3px;">📊 LuxAlgo</span>`;
 
     tr.innerHTML = `
       <td style="text-align: center; color: var(--text-faint); font-family: var(--font-mono); font-size: 11px;">
@@ -1700,6 +1812,9 @@ function renderTable() {
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                 </svg>
               </button>
+            </div>
+            <div style="margin-top: 3px;">
+              ${indicatorBadgeHtml}
             </div>
           </div>
         </div>
@@ -1736,9 +1851,13 @@ function renderTable() {
             </div>
           </div>
           <div class="perf-matrix-bottom">
-            <span class="pf-pill">PF: ${pf.toFixed(2)}</span>
-            <span class="pnl-cell" style="color: ${pnl >= 0 ? 'var(--long-green)' : 'var(--short-red)'}; font-weight: 700;">
-              ${pnl >= 0 ? '+$' : '$'}${pnl.toFixed(1)}
+            ${isTurtle
+              ? `<span class="pf-pill" style="color: var(--accent-cyan); font-weight: 700;">Avg: ${Number(s.avgProfit !== undefined ? s.avgProfit : (s.avg_profit || 0)).toFixed(2)}%</span>`
+              : `<span class="pf-pill">PF: ${pf.toFixed(2)}</span>`}
+            <span class="pnl-cell" style="color: ${(isTurtle ? Number(s.totalProfit !== undefined ? s.totalProfit : (s.total_profit || 0)) : pnl) >= 0 ? 'var(--long-green)' : 'var(--short-red)'}; font-weight: 700;">
+              ${isTurtle
+                ? `Total: ${Number(s.totalProfit !== undefined ? s.totalProfit : (s.total_profit || 0)) >= 0 ? '+' : ''}${Number(s.totalProfit !== undefined ? s.totalProfit : (s.total_profit || 0)).toFixed(1)}%`
+                : `${pnl >= 0 ? '+$' : '$'}${pnl.toFixed(1)}`}
             </span>
           </div>
         </div>
@@ -2200,20 +2319,27 @@ window.addEventListener('resize', () => {
 function copySetupToClipboard(s) {
   const isLong = s.signal === 'long';
   const displaySym = cleanDisplaySymbol(s.symbol);
+  const isTurtle = s.indicator === 'turtle_soup';
+  const indName = isTurtle ? 'Turtle Soup | Flux Charts' : 'LuxAlgo - Universal Signal Backtester';
+  const perfLine = isTurtle
+    ? `📈 Winrate: ${s.winRate}% | Avg Profit: ${Number(s.avgProfit !== undefined ? s.avgProfit : (s.avg_profit || 0)).toFixed(2)}% | Total Profit: ${Number(s.totalProfit !== undefined ? s.totalProfit : (s.total_profit || 0)).toFixed(1)}%`
+    : `📈 Win Rate: ${s.winRate}% | Profit Factor: ${s.profitFactor} | Total PnL: $${s.totalPnL}`;
+
   const text = [
     `🎯 [KÈO PHÁI SINH OKX] ${displaySym}`,
+    `📊 Chỉ báo: ${indName}`,
     `⚡ Khung cơ sở: ${s.baseTimeframe.replace('m', 'p')} | Vị thế: ${s.signal.toUpperCase()}`,
     `💵 Entry: $${formatPrice(s.entry)}`,
     s.tp1 ? `🎯 TP1: $${formatPrice(s.tp1)} (${calculateGainPct(s.entry, s.tp1, s.signal)})` : '',
     s.tp2 ? `🎯 TP2: $${formatPrice(s.tp2)} (${calculateGainPct(s.entry, s.tp2, s.signal)})` : '',
     s.tp3 ? `🎯 TP3: $${formatPrice(s.tp3)} (${calculateGainPct(s.entry, s.tp3, s.signal)})` : '',
     s.sl ? `🛑 Stop Loss: $${formatPrice(s.sl)} (${calculateGainPct(s.entry, s.sl, s.signal)})` : '',
-    `📊 Win Rate: ${s.winRate}% | Profit Factor: ${s.profitFactor} | Total PnL: $${s.totalPnL}`,
+    perfLine,
     `⏱️ Quét lúc: ${new Date(s.scannedAt).toLocaleTimeString('vi-VN')} - Local Orchestrator Pro`
   ].filter(Boolean).join('\n');
 
   navigator.clipboard.writeText(text).then(() => {
-    showToast(`Đã sao chép tín hiệu ${displaySym} vào Clipboard!`, 'success');
+    showToast(`Đã sao chép tín hiệu ${displaySym} (${isTurtle ? 'Turtle' : 'LuxAlgo'}) vào Clipboard!`, 'success');
   }).catch(() => {
     showToast('Không thể truy cập Clipboard trình duyệt.', 'error');
   });
@@ -2321,9 +2447,18 @@ elements.resetDefaultSettingsBtn.addEventListener('click', () => {
     elements.toggleTf4h.checked = true;
     updateToggleCardStyles();
 
-    elements.cfgMinWinRate.value = '42.0';
-    elements.cfgMinProfitFactor.value = '0.80';
-    elements.cfgMinTotalPnL.value = '0.0';
+    if (elements.cfgLuxEnabled) elements.cfgLuxEnabled.checked = true;
+    if (elements.cfgLuxWinRate) elements.cfgLuxWinRate.value = '36.0';
+    if (elements.cfgLuxProfitFactor) elements.cfgLuxProfitFactor.value = '0.80';
+    if (elements.cfgLuxTotalPnL) elements.cfgLuxTotalPnL.value = '0.0';
+
+    if (elements.cfgTurtleEnabled) elements.cfgTurtleEnabled.checked = true;
+    if (elements.cfgTurtleWinRate) elements.cfgTurtleWinRate.value = '40.0';
+    if (elements.cfgTurtleAvgProfit) elements.cfgTurtleAvgProfit.value = '0.10';
+    if (elements.cfgTurtleTotalProfit) elements.cfgTurtleTotalProfit.value = '0.0';
+
+    updateIndicatorStatusLabels();
+
     elements.cfgSoundAlert.checked = true;
     elements.cfgRefreshInterval.value = '30';
   }

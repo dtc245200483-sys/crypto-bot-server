@@ -89,7 +89,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(logger.requestLogger);
 
 // Phục vụ giao diện Web Dashboard tĩnh (Không lưu cache để cập nhật tức thì)
-app.use(express.static(path.join(__dirname, 'public'), { etag: false, maxAge: 0 }));
+app.use(express.static(path.join(__dirname, 'public'), {
+  etag: false,
+  maxAge: 0,
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+}));
 
 // =============================================================================
 // API ROUTES
@@ -252,10 +260,36 @@ app.post('/api/config', (req, res) => {
     }
 
     if (newConfig.thresholds) {
+      const curTh = config.thresholds || {};
+      const newTh = newConfig.thresholds;
+
+      const lux = newTh.luxalgo || {};
+      const curLux = curTh.luxalgo || {};
+      const updatedLux = {
+        enabled: typeof lux.enabled === 'boolean' ? lux.enabled : (curLux.enabled !== false),
+        minWinRate: lux.minWinRate !== undefined ? Math.max(0, Number(lux.minWinRate) || 0) : (curLux.minWinRate !== undefined ? curLux.minWinRate : 36),
+        minProfitFactor: lux.minProfitFactor !== undefined ? Math.max(0, Number(lux.minProfitFactor) || 0) : (curLux.minProfitFactor !== undefined ? curLux.minProfitFactor : 0.8),
+        minTotalPnL: lux.minTotalPnL !== undefined ? Number(lux.minTotalPnL) || 0 : (curLux.minTotalPnL !== undefined ? curLux.minTotalPnL : 0)
+      };
+
+      const turtle = newTh.turtle_soup || {};
+      const curTurtle = curTh.turtle_soup || {};
+      const updatedTurtle = {
+        enabled: typeof turtle.enabled === 'boolean' ? turtle.enabled : (curTurtle.enabled !== false),
+        minWinRate: turtle.minWinRate !== undefined ? Math.max(0, Number(turtle.minWinRate) || 0) : (curTurtle.minWinRate !== undefined ? curTurtle.minWinRate : 40),
+        minAvgProfit: turtle.minAvgProfit !== undefined ? Number(turtle.minAvgProfit) || 0 : (curTurtle.minAvgProfit !== undefined ? curTurtle.minAvgProfit : 0.1),
+        minTotalProfit: turtle.minTotalProfit !== undefined ? Number(turtle.minTotalProfit) || 0 : (curTurtle.minTotalProfit !== undefined ? curTurtle.minTotalProfit : 0)
+      };
+
       config.thresholds = {
-        minWinRate: Math.max(0, Number(newConfig.thresholds.minWinRate) || 0),
-        minProfitFactor: Math.max(0, Number(newConfig.thresholds.minProfitFactor) || 0),
-        minTotalPnL: Number(newConfig.thresholds.minTotalPnL) || 0
+        luxalgo: updatedLux,
+        turtle_soup: updatedTurtle,
+        // Fallback
+        minWinRate: newTh.minWinRate !== undefined ? Number(newTh.minWinRate) : updatedLux.minWinRate,
+        minAvgProfit: newTh.minAvgProfit !== undefined ? Number(newTh.minAvgProfit) : updatedTurtle.minAvgProfit,
+        minTotalProfit: newTh.minTotalProfit !== undefined ? Number(newTh.minTotalProfit) : updatedTurtle.minTotalProfit,
+        minProfitFactor: newTh.minProfitFactor !== undefined ? Number(newTh.minProfitFactor) : updatedLux.minProfitFactor,
+        minTotalPnL: newTh.minTotalPnL !== undefined ? Number(newTh.minTotalPnL) : updatedLux.minTotalPnL
       };
     }
 
@@ -497,38 +531,96 @@ app.post('/api/setups', (req, res) => {
         continue;
       }
 
-      // 5.3. Kiểm tra ngưỡng kỹ thuật tập trung theo config.json
+      // 5.3. Kiểm tra ngưỡng kỹ thuật Lớp 2 theo config.json cho từng chỉ báo độc lập
+      const indicatorKey = s.indicator || 'luxalgo';
+      const indTh = (thresholds && thresholds[indicatorKey]) ? thresholds[indicatorKey] : thresholds;
+      const indLabel = indicatorKey === 'turtle_soup' ? 'Turtle Soup' : 'LuxAlgo';
+
+      // Nếu chỉ báo bị tắt ở Web Server
+      if (indTh && indTh.enabled === false) {
+        rejectedSetups.push({
+          symbol: s.symbol,
+          indicator: indicatorKey,
+          reason: `Chỉ báo ${indLabel} đang bị TẮT trong cài đặt Lớp 2 (Web Server).`
+        });
+        continue;
+      }
+
       const winRate = Number(s.winRate) || 0;
+      const avgProfit = Number(s.avgProfit !== undefined ? s.avgProfit : s.avg_profit) || 0;
+      const totalProfit = Number(s.totalProfit !== undefined ? s.totalProfit : s.total_profit) || 0;
       const profitFactor = Number(s.profitFactor) || 0;
       const totalPnL = Number(s.totalPnL) || 0;
 
-      if (winRate < thresholds.minWinRate || winRate > 100) {
+      // 1. Kiểm tra Win Rate
+      const minWr = (indTh && typeof indTh.minWinRate === 'number') ? indTh.minWinRate : 36.0;
+      if (winRate < minWr || winRate > 100) {
         rejectedSetups.push({
           symbol: s.symbol,
-          reason: `Win Rate (${winRate}%) không hợp lệ (phải trong khoảng ${thresholds.minWinRate}% - 100%).`
+          indicator: indicatorKey,
+          reason: `[${indLabel}] Win Rate (${winRate}%) không đạt ngưỡng Lớp 2 (tối thiểu ${minWr}%).`
         });
         continue;
       }
 
-      if (profitFactor < thresholds.minProfitFactor || profitFactor > 50) {
-        rejectedSetups.push({
-          symbol: s.symbol,
-          reason: `Profit Factor (${profitFactor}) không hợp lệ (phải trong khoảng ${thresholds.minProfitFactor} - 50).`
-        });
-        continue;
-      }
+      if (indicatorKey === 'turtle_soup') {
+        // 2. Kiểm tra Avg Profit (%)
+        if (indTh && typeof indTh.minAvgProfit === 'number') {
+          if (avgProfit < indTh.minAvgProfit) {
+            rejectedSetups.push({
+              symbol: s.symbol,
+              indicator: indicatorKey,
+              reason: `[${indLabel}] Avg Profit (${avgProfit}%) không đạt ngưỡng Lớp 2 (tối thiểu ${indTh.minAvgProfit}%).`
+            });
+            continue;
+          }
+        }
+        // 3. Kiểm tra Total Profit (%)
+        if (indTh && typeof indTh.minTotalProfit === 'number') {
+          if (totalProfit < indTh.minTotalProfit) {
+            rejectedSetups.push({
+              symbol: s.symbol,
+              indicator: indicatorKey,
+              reason: `[${indLabel}] Total Profit (${totalProfit}%) không đạt ngưỡng Lớp 2 (tối thiểu ${indTh.minTotalProfit}%).`
+            });
+            continue;
+          }
+        }
+      } else {
+        // luxalgo: Profit Factor & Total PnL
+        if (indTh && typeof indTh.minProfitFactor === 'number' && profitFactor > 0 && profitFactor < indTh.minProfitFactor) {
+          rejectedSetups.push({
+            symbol: s.symbol,
+            indicator: indicatorKey,
+            reason: `[${indLabel}] Profit Factor (${profitFactor}) không đạt ngưỡng Lớp 2 (tối thiểu ${indTh.minProfitFactor}).`
+          });
+          continue;
+        }
 
-      if (totalPnL < thresholds.minTotalPnL) {
-        rejectedSetups.push({
-          symbol: s.symbol,
-          reason: `Total PnL ($${totalPnL}) không đạt ngưỡng tối thiểu ($${thresholds.minTotalPnL}).`
-        });
-        continue;
+        if (indTh && typeof indTh.minTotalPnL === 'number' && totalPnL !== 0 && totalPnL < indTh.minTotalPnL) {
+          rejectedSetups.push({
+            symbol: s.symbol,
+            indicator: indicatorKey,
+            reason: `[${indLabel}] Total PnL ($${totalPnL}) không đạt ngưỡng Lớp 2 (tối thiểu $${indTh.minTotalPnL}).`
+          });
+          continue;
+        }
       }
 
       // Đạt toàn bộ kiểm tra hợp lệ -> Lưu vào Database SQLite
       const id = db.insertSetup(s);
-      savedSetups.push({ id, symbol: s.symbol, baseTimeframe: s.baseTimeframe, signal: s.signal, winRate: s.winRate, profitFactor: s.profitFactor, totalPnL: s.totalPnL });
+      savedSetups.push({ 
+        id, 
+        symbol: s.symbol, 
+        baseTimeframe: s.baseTimeframe, 
+        signal: s.signal, 
+        indicator: indicatorKey,
+        winRate: s.winRate, 
+        avgProfit: avgProfit,
+        totalProfit: totalProfit,
+        profitFactor: s.profitFactor, 
+        totalPnL: s.totalPnL 
+      });
 
       // Tự động gọi OKX Candles API lấy nến 3 khung 30m, 1H, 4H bất đồng bộ (không chặn response)
       syncSetupCandles(id, s.symbol).then(result => {

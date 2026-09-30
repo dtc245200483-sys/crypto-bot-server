@@ -6,7 +6,7 @@
   <title>BOT CRYPTO PRO — Giao Dịch Phái Sinh Tự Động &amp; Bảng Kèo TradingView OKX</title>
   <meta name="description" content="BOT CRYPTO PRO — Hệ thống điều phối &amp; Bảng tổng hợp tín hiệu phái sinh đạt chuẩn đa khung thời gian 15p, 30p, 1h, 4h từ TradingView sang OKX.">
   <link rel="icon" type="image/svg+xml" href="assets/moon-logo.svg">
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1469,47 +1469,124 @@
           </div>
         </div>
 
-        <!-- SECTION 2: TECHNICAL THRESHOLDS -->
+        <!-- SECTION 2: TECHNICAL THRESHOLDS (2 LỚP CHỈ BÁO ĐỘC LẬP) -->
         <div class="settings-section">
           <div class="section-title-wrap">
             <span class="section-badge">2</span>
             <div>
-              <h3 class="section-heading">Ngưỡng Lọc Kỹ Thuật Tập Trung</h3>
-              <p class="section-sub">Chỉ lưu các kèo thỏa mãn đồng thời cả 3 tiêu chí dưới đây.</p>
+              <h3 class="section-heading">Ngưỡng Lọc Kỹ Thuật Lớp 2 (Web Server)</h3>
+              <p class="section-sub">Lớp bảo vệ thứ 2: Cài đặt độc lập cho 2 chỉ báo để lọc và nhận kèo theo tiêu chuẩn riêng.</p>
             </div>
           </div>
 
-          <div class="threshold-inputs-grid">
-            <div class="input-card">
-              <label for="cfgMinWinRate" class="input-label">
-                <span>Tối thiểu Win Rate (%)</span>
-                <span class="input-hint">Mặc định: 42.0%</span>
-              </label>
-              <div class="input-number-wrap">
-                <input type="number" id="cfgMinWinRate" step="0.5" min="0" max="100" value="42.0">
-                <span class="input-unit">%</span>
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <!-- CARD 1: LUXALGO BACKTESTER MOD -->
+            <div class="indicator-settings-card" style="background: rgba(245, 158, 11, 0.03); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 8px; padding: 12px 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 14px;">📊</span>
+                  <div>
+                    <h4 style="margin: 0; font-size: 13px; font-weight: 700; color: #f59e0b;">Chỉ Báo 1: LuxAlgo - Universal Signal Backtester MOD</h4>
+                    <span style="font-size: 11px; color: var(--text-faint);">Lọc theo Win Rate, Profit Factor và Total PnL</span>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span id="cfgLuxStatusText" style="font-size: 11px; font-weight: 700; color: #00e676;">Đang nhận</span>
+                  <label class="switch">
+                    <input type="checkbox" id="cfgLuxEnabled" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="threshold-inputs-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
+                <div class="input-card">
+                  <label for="cfgLuxWinRate" class="input-label">
+                    <span>Tối thiểu Win Rate (%)</span>
+                    <span class="input-hint">Mặc định: 36.0%</span>
+                  </label>
+                  <div class="input-number-wrap">
+                    <input type="number" id="cfgLuxWinRate" step="0.5" min="0" max="100" value="36.0">
+                    <span class="input-unit">%</span>
+                  </div>
+                </div>
+
+                <div class="input-card">
+                  <label for="cfgLuxProfitFactor" class="input-label">
+                    <span>Tối thiểu Profit Factor</span>
+                    <span class="input-hint">Mặc định: 0.80</span>
+                  </label>
+                  <div class="input-number-wrap">
+                    <input type="number" id="cfgLuxProfitFactor" step="0.05" min="0" max="10" value="0.80">
+                    <span class="input-unit">PF</span>
+                  </div>
+                </div>
+
+                <div class="input-card">
+                  <label for="cfgLuxTotalPnL" class="input-label">
+                    <span>Tối thiểu Total PnL ($)</span>
+                    <span class="input-hint">Mặc định: $0</span>
+                  </label>
+                  <div class="input-number-wrap">
+                    <input type="number" id="cfgLuxTotalPnL" step="10" min="-1000" max="100000" value="0.0">
+                    <span class="input-unit">$</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div class="input-card">
-              <label for="cfgMinProfitFactor" class="input-label">
-                <span>Tối thiểu Profit Factor</span>
-                <span class="input-hint">Mặc định: 0.80</span>
-              </label>
-              <div class="input-number-wrap">
-                <input type="number" id="cfgMinProfitFactor" step="0.05" min="0" max="10" value="0.80">
-                <span class="input-unit">PF</span>
+            <!-- CARD 2: TURTLE SOUP | FLUX CHARTS -->
+            <div class="indicator-settings-card" style="background: rgba(6, 182, 212, 0.03); border: 1px solid rgba(6, 182, 212, 0.25); border-radius: 8px; padding: 12px 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 14px;">🐢</span>
+                  <div>
+                    <h4 style="margin: 0; font-size: 13px; font-weight: 700; color: #06b6d4;">Chỉ Báo 2: Turtle Soup | Flux Charts</h4>
+                    <span style="font-size: 11px; color: var(--text-faint);">Lọc theo Winrate, Avg Profit (%) và Total Profit (%)</span>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span id="cfgTurtleStatusText" style="font-size: 11px; font-weight: 700; color: #00e676;">Đang nhận</span>
+                  <label class="switch">
+                    <input type="checkbox" id="cfgTurtleEnabled" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
               </div>
-            </div>
 
-            <div class="input-card">
-              <label for="cfgMinTotalPnL" class="input-label">
-                <span>Tối thiểu Total PnL ($)</span>
-                <span class="input-hint">Mặc định: $0</span>
-              </label>
-              <div class="input-number-wrap">
-                <input type="number" id="cfgMinTotalPnL" step="10" min="-1000" max="100000" value="0.0">
-                <span class="input-unit">$</span>
+              <div class="threshold-inputs-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
+                <div class="input-card">
+                  <label for="cfgTurtleWinRate" class="input-label">
+                    <span>Tối thiểu Winrate (%)</span>
+                    <span class="input-hint">Mặc định: 40.0%</span>
+                  </label>
+                  <div class="input-number-wrap">
+                    <input type="number" id="cfgTurtleWinRate" step="0.5" min="0" max="100" value="40.0">
+                    <span class="input-unit">%</span>
+                  </div>
+                </div>
+
+                <div class="input-card">
+                  <label for="cfgTurtleAvgProfit" class="input-label">
+                    <span>Tối thiểu Avg Profit (%)</span>
+                    <span class="input-hint">Mặc định: 0.10%</span>
+                  </label>
+                  <div class="input-number-wrap">
+                    <input type="number" id="cfgTurtleAvgProfit" step="0.05" min="0" max="50" value="0.10">
+                    <span class="input-unit">%</span>
+                  </div>
+                </div>
+
+                <div class="input-card">
+                  <label for="cfgTurtleTotalProfit" class="input-label">
+                    <span>Tối thiểu Total Profit (%)</span>
+                    <span class="input-hint">Mặc định: 0.0%</span>
+                  </label>
+                  <div class="input-number-wrap">
+                    <input type="number" id="cfgTurtleTotalProfit" step="0.5" min="0" max="500" value="0.0">
+                    <span class="input-unit">%</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1598,6 +1675,6 @@
   </script>
   <!-- Interactive Moon Spotlight & Video Loop Synchronizer -->
   <script src="moon-scratch.js"></script>
-  <script src="app.js?v=14"></script>
+  <script src="app.js?v=15"></script>
 </body>
 </html>

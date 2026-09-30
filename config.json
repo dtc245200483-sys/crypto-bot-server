@@ -1,6 +1,20 @@
 {
   "thresholds": {
+    "luxalgo": {
+      "enabled": true,
+      "minWinRate": 36,
+      "minProfitFactor": 0.8,
+      "minTotalPnL": 0
+    },
+    "turtle_soup": {
+      "enabled": true,
+      "minWinRate": 40,
+      "minAvgProfit": 0.1,
+      "minTotalProfit": 0
+    },
     "minWinRate": 36,
+    "minAvgProfit": 0.1,
+    "minTotalProfit": 0,
     "minProfitFactor": 0.8,
     "minTotalPnL": 0
   },
