@@ -1578,12 +1578,12 @@
                 </div>
 
                 <div class="input-card">
-                  <label for="cfgTurtleTotalProfit" class="input-label">
-                    <span>Tối thiểu Total Profit (%)</span>
-                    <span class="input-hint">Mặc định: 0.0%</span>
+                  <label for="cfgTurtleTotalProfit" class="input-label" title="Chỉ nhận coin có Total Profit lớn hơn hoặc bằng (≥) số này">
+                    <span>Tối thiểu Total Profit (≥ %)</span>
+                    <span class="input-hint">Lớn hơn hoặc bằng (≥ số này)</span>
                   </label>
                   <div class="input-number-wrap">
-                    <input type="number" id="cfgTurtleTotalProfit" step="0.5" min="0" max="500" value="0.0">
+                    <input type="number" id="cfgTurtleTotalProfit" step="0.5" min="-1000" max="5000" value="0.0" title="Chỉ nhận coin có Total Profit lớn hơn hoặc bằng (≥) số này">
                     <span class="input-unit">%</span>
                   </div>
                 </div>

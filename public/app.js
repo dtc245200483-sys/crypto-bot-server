@@ -1326,7 +1326,9 @@ function applyConfigToUI() {
     elements.footPf.innerHTML = `PF &gt; <b>${luxCfg.minProfitFactor ?? 0.8}</b> • Avg &gt; <b>${turtleCfg.minAvgProfit ?? 0.1}%</b>`;
   }
   if (elements.footPnl) {
-    elements.footPnl.innerHTML = `PnL &gt; <b>$${luxCfg.minTotalPnL ?? 0}</b> • Tot &gt; <b>${turtleCfg.minTotalProfit ?? 0}%</b>`;
+    const luxPnl = luxCfg.minTotalPnL ?? 0;
+    const turtleTot = turtleCfg.minTotalProfit ?? 0;
+    elements.footPnl.innerHTML = `PnL &gt; <b>$${luxPnl}</b> • Tot ≥ <b>${turtleTot}%</b>`;
   }
 
   const activeNames = allowed.map(tf => tf.replace('m', 'p')).join(', ');
@@ -1340,7 +1342,8 @@ function applyConfigToUI() {
     const minLuxPf = Number(luxCfg.minProfitFactor ?? 0.8).toFixed(2);
     const minTurtleWr = turtleCfg.minWinRate ?? 40;
     const minTurtleAvg = Number(turtleCfg.minAvgProfit ?? 0.1).toFixed(2);
-    elements.supportThresholdVal.textContent = `Lux: WR>${minLuxWr}% PF>${minLuxPf} • Turtle: WR>${minTurtleWr}% Avg>${minTurtleAvg}%`;
+    const minTurtleTot = Number(turtleCfg.minTotalProfit ?? 0).toFixed(1);
+    elements.supportThresholdVal.textContent = `Lux: WR>${minLuxWr}% PF>${minLuxPf} • Turtle: WR≥${minTurtleWr}% Avg≥${minTurtleAvg}% Tot≥${minTurtleTot}%`;
   }
 
   // 3. Cập nhật Icon âm thanh
@@ -1486,7 +1489,7 @@ async function saveConfigToServer() {
           enabled: elements.cfgTurtleEnabled ? elements.cfgTurtleEnabled.checked : true,
           minWinRate: parseFloat(elements.cfgTurtleWinRate?.value) || 40.0,
           minAvgProfit: parseFloat(elements.cfgTurtleAvgProfit?.value) || 0.10,
-          minTotalProfit: parseFloat(elements.cfgTurtleTotalProfit?.value) || 0.0,
+          minTotalProfit: (elements.cfgTurtleTotalProfit && !isNaN(parseFloat(elements.cfgTurtleTotalProfit.value))) ? parseFloat(elements.cfgTurtleTotalProfit.value) : 0.0,
           allowedTimeframes: turtleTfs.length > 0 ? turtleTfs : ['30m', '1h', '4h']
         }
       },
@@ -1607,7 +1610,7 @@ function updateMetricsAndDistribution(setups) {
   elements.totalSetupsSub.textContent = `Vào lệnh: ${formattedTfNames || 'Chưa bật'} (15p xác nhận)`;
   const luxCfg = systemConfig.thresholds?.luxalgo || systemConfig.thresholds || {};
   const turtleCfg = systemConfig.thresholds?.turtle_soup || {};
-  elements.thresholdDisplaySub.textContent = `Lux: WR > ${luxCfg.minWinRate ?? 36}% PF > ${luxCfg.minProfitFactor ?? 0.8} | Turtle: WR > ${turtleCfg.minWinRate ?? 40}% Avg > ${turtleCfg.minAvgProfit ?? 0.1}%`;
+  elements.thresholdDisplaySub.textContent = `Lux: WR > ${luxCfg.minWinRate ?? 36}% PF > ${luxCfg.minProfitFactor ?? 0.8} | Turtle: WR ≥ ${turtleCfg.minWinRate ?? 40}% Avg ≥ ${turtleCfg.minAvgProfit ?? 0.1}% Tot ≥ ${turtleCfg.minTotalProfit ?? 0}%`;
 }
 
 // =============================================================================
@@ -1664,7 +1667,9 @@ function getFilteredAndSortedSetups() {
 
       const minWr = Number(cfgTurtle.minWinRate) || 0;
       const minAvg = Number(cfgTurtle.minAvgProfit) || 0;
-      const minTot = Number(cfgTurtle.minTotalProfit) || 0;
+      const minTot = (cfgTurtle.minTotalProfit !== undefined && cfgTurtle.minTotalProfit !== null && cfgTurtle.minTotalProfit !== '')
+        ? Number(cfgTurtle.minTotalProfit)
+        : 0;
 
       const wr = Number(s.winRate) || 0;
       const avg = Number(s.avgProfit !== undefined ? s.avgProfit : s.avg_profit) || 0;
@@ -1672,7 +1677,8 @@ function getFilteredAndSortedSetups() {
 
       if (minWr > 0 && wr < minWr) return false;
       if (minAvg > 0 && avg < minAvg) return false;
-      if (tot < minTot) return false;
+      // Chỉ nhận coin khi Total Profit lớn hơn hoặc bằng ngưỡng cài đặt (tot >= minTot)
+      if (!isNaN(minTot) && tot < minTot) return false;
     } else {
       // LuxAlgo (hoặc mặc định) - lọc theo khung vào lệnh allowedBaseTimeframes
       const luxAllowed = (systemConfig.allowedBaseTimeframes || ['30m', '1h', '4h']).map(t => String(t).toLowerCase());
